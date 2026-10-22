@@ -54,5 +54,38 @@ public class RequestConfiguration : IEntityTypeConfiguration<Request>
             .WithOne(h => h.Request)
             .HasForeignKey(h => h.RequestId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        // ── Indexes ──────────────────────────────────────────────────────────
+        // All composite indexes include CreatedAt DESC as the trailing key so
+        // that the common "most recent first" sort is covered without a sort
+        // operator in the execution plan.  Id is added as a non-key INCLUDE
+        // on the first index to support stable keyset pagination (future).
+
+        // Default sort, date-range filter.  Used by almost every list query.
+        builder.HasIndex(r => new { r.CreatedAt })
+            .HasDatabaseName("IX_Requests_CreatedAt")
+            .IsDescending(true);
+
+        // Status filter + default sort; also covers GROUP BY Status (summary).
+        builder.HasIndex(r => new { r.Status, r.CreatedAt })
+            .HasDatabaseName("IX_Requests_Status_CreatedAt")
+            .IsDescending(false, true);
+
+        // Priority filter + default sort; also covers GROUP BY Priority (summary).
+        builder.HasIndex(r => new { r.Priority, r.CreatedAt })
+            .HasDatabaseName("IX_Requests_Priority_CreatedAt")
+            .IsDescending(false, true);
+
+        // "My requests" filter by handler.
+        builder.HasIndex(r => new { r.AssignedTo, r.CreatedAt })
+            .HasDatabaseName("IX_Requests_AssignedTo_CreatedAt")
+            .IsDescending(false, true);
+
+        // OrganizationName StartsWith filter and sort.
+        // LIKE 'Acme%' is sargable on this index; LIKE '%Acme%' is not.
+        // Full-text search (Contains) will still cause a scan — documented as
+        // a known bottleneck in docs/performance.md.
+        builder.HasIndex(r => r.OrganizationName)
+            .HasDatabaseName("IX_Requests_OrganizationName");
     }
 }

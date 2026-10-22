@@ -64,6 +64,25 @@ namespace RequestsManagement.Api.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CreatedAt")
+                        .IsDescending()
+                        .HasDatabaseName("IX_Requests_CreatedAt");
+
+                    b.HasIndex("OrganizationName")
+                        .HasDatabaseName("IX_Requests_OrganizationName");
+
+                    b.HasIndex("AssignedTo", "CreatedAt")
+                        .IsDescending(false, true)
+                        .HasDatabaseName("IX_Requests_AssignedTo_CreatedAt");
+
+                    b.HasIndex("Priority", "CreatedAt")
+                        .IsDescending(false, true)
+                        .HasDatabaseName("IX_Requests_Priority_CreatedAt");
+
+                    b.HasIndex("Status", "CreatedAt")
+                        .IsDescending(false, true)
+                        .HasDatabaseName("IX_Requests_Status_CreatedAt");
+
                     b.ToTable("Requests", (string)null);
                 });
 
@@ -94,7 +113,9 @@ namespace RequestsManagement.Api.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("RequestId");
+                    b.HasIndex("RequestId", "ChangedAt")
+                        .IsDescending(false, true)
+                        .HasDatabaseName("IX_RequestStatusHistory_RequestId_ChangedAt");
 
                     b.ToTable("RequestStatusHistory", (string)null);
                 });

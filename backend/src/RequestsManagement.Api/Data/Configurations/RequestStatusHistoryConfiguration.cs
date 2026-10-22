@@ -32,5 +32,11 @@ public class RequestStatusHistoryConfiguration : IEntityTypeConfiguration<Reques
         builder.Property(h => h.ChangedBy)
             .IsRequired()
             .HasMaxLength(100);
+
+        // Index on (RequestId, ChangedAt DESC) — covers
+        // GET /api/requests/{id}/history ordered newest-first.
+        builder.HasIndex(h => new { h.RequestId, h.ChangedAt })
+            .HasDatabaseName("IX_RequestStatusHistory_RequestId_ChangedAt")
+            .IsDescending(false, true);
     }
 }

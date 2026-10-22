@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using RequestsManagement.Api.Data;
+using RequestsManagement.Api.Data.Seeding;
+using RequestsManagement.Api.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +14,13 @@ builder.Services.AddControllers()
         opts.JsonSerializerOptions.Converters.Add(
             new System.Text.Json.Serialization.JsonStringEnumConverter());
     });
+
+// Return RFC 7807 ProblemDetails for model-validation errors (HTTP 400).
+// This avoids the default plain-text format and keeps the contract consistent.
+builder.Services.AddProblemDetails();
+
+// Centralized exception handler — logs and returns safe ProblemDetails (HTTP 500).
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -32,8 +41,31 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// Must be registered before routing so it can catch exceptions from any middleware.
+app.UseExceptionHandler();
+
 app.UseHttpsRedirection();
 app.MapControllers();
+
+app.Run();
+
+// ── Seed mode ────────────────────────────────────────────────────────────────
+// Run as:  dotnet run -- --seed [count]
+// Exits after seeding; does NOT start the web server.
+if (args.Contains("--seed"))
+{
+    int seedCount = 100_000;
+    int idx = Array.IndexOf(args, "--seed");
+    if (idx + 1 < args.Length && int.TryParse(args[idx + 1], out int parsed))
+        seedCount = parsed;
+
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    var seederLogger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+
+    await DataSeeder.RunAsync(db, seederLogger, seedCount);
+    return;
+}
 
 app.Run();
 
