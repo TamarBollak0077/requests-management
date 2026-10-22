@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using RequestsManagement.Api.Data;
 using RequestsManagement.Api.Data.Seeding;
 using RequestsManagement.Api.Infrastructure;
+using RequestsManagement.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +25,9 @@ builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Application services — Scoped matches DbContext lifetime (one per HTTP request)
+builder.Services.AddScoped<IRequestQueryService, RequestQueryService>();
 
 // EF Core — SQL Server, scoped lifetime (default for DbContext)
 builder.Services.AddDbContext<AppDbContext>(opts =>

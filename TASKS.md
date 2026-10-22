@@ -295,20 +295,20 @@ RequestsManagement/                (GitHub repo)
 | T-104 | Seeder ׳-100,000 ׳¨׳©׳•׳׳•׳× ׳©׳׳₪׳©׳¨ ׳׳”׳¨׳™׳¥ ׳׳—׳“׳© | E1 | 0.5 | P1 | T-102 | 1 | Done  |
 | T-304 | Global error handling, ProblemDetails, Logging | E3 | 0.25 | P1 | T-101 | 1 | Done  |
 | T-201 | Query DTOs, ׳₪׳¨׳׳˜׳¨׳™׳ ׳•-Validation | E2 Query API | 0.5 | P1 | T-102 | 2 | Done  |
-| T-202 | RequestQueryService: ׳¡׳™׳ ׳•׳, ׳—׳™׳₪׳•׳©, ׳׳™׳•׳, ׳“׳₪׳“׳•׳£ | E2 | 0.75 | P1 | T-201 | 2 | To Do |
-| T-203 | RequestsController: GET list ׳•-GET by id | E2 | 0.25 | P1 | T-202 | 2 | To Do |
-| T-204 | Aggregations endpoint | E2 | 0.25 | P1 | T-202 | 2 | To Do |
+| T-202 | RequestQueryService: ׳¡׳™׳ ׳•׳, ׳—׳™׳₪׳•׳©, ׳׳™׳•׳, ׳“׳₪׳“׳•׳£ | E2 | 0.75 | P1 | T-201 | 2 | In Progress |
+| T-203 | RequestsController: GET list ׳•-GET by id | E2 | 0.25 | P1 | T-202 | 2 | In Progress |
+| T-204 | Aggregations endpoint | E2 | 0.25 | P1 | T-202 | 2 | In Progress |
 | T-301 | StatusTransitionPolicy | E3 Update & Audit | 0.25 | P1 | T-102 | 2 | Done  |
 | T-302 | ׳¢׳“׳›׳•׳ ׳¡׳˜׳˜׳•׳¡ ׳‘׳•׳“׳“: Concurrency ׳•-Audit | E3 | 0.75 | P1 | T-301, T-304 | 3 | To Do |
 | T-303 | History endpoint | E3 | 0.25 | P1 | T-302 | 3 | To Do |
 | T-401 | Bulk status update (Partial Success) | E4 Bulk | 0.75 | P1 | T-302 | 3 | To Do |
 | T-501 | Cache ׳-Summary: Expiration ׳•-Invalidation | E5 Cache | 0.5 | P1 | T-204, T-302, T-401 | 3 | To Do |
-| T-601 | ׳×׳©׳×׳™׳× Integration Tests | E6 Tests | 0.5 | P1 | T-203 | 4 | To Do |
+| T-601 | ׳×׳©׳×׳™׳× Integration Tests | E6 Tests | 0.5 | P1 | T-203 | 4 | In Progress |
 | T-602 | Unit tests: ׳׳¢׳‘׳¨׳™ ׳¡׳˜׳˜׳•׳¡ ׳•-Validation | E6 | 0.25 | P1 | T-201, T-301 | 4 | To Do |
 | T-603 | Integration: ׳©׳׳™׳₪׳”, ׳¡׳™׳ ׳•׳ ׳•׳“׳₪׳“׳•׳£ | E6 | 0.25 | P1 | T-601 | 4 | To Do |
 | T-604 | Integration: Concurrency Conflict ׳•-Audit | E6 | 0.5 | P1 | T-601, T-302 | 4 | To Do |
 | T-801 | ׳׳“׳™׳“׳× ׳‘׳™׳¦׳•׳¢׳™׳ ׳•-docs/performance.md | E8 Perf | 0.75 | P1 | T-104, T-203, T-204 | 4 | To Do |
-| T-701 | Angular scaffold, Proxy, Models, ApiService | E7 Angular | 0.5 | P1 | T-203 | 5 | To Do |
+| T-701 | Angular scaffold, Proxy, Models, ApiService | E7 Angular | 0.5 | P1 | T-203 | 5 | In Progress |
 | T-702 | ׳¢׳׳•׳“ ׳”׳¨׳©׳™׳׳”: RxJS Pipeline ׳•׳׳¦׳‘׳™ UI | E7 | 1.5 | P1 | T-701 | 5 | To Do |
 | T-703 | Summary panel | E7 | 0.25 | P1 | T-701, T-204 | 5 | To Do |
 | T-704 | ׳¢׳“׳›׳•׳ ׳¡׳˜׳˜׳•׳¡ ׳•׳˜׳™׳₪׳•׳ ׳‘-409 ׳‘-UI | E7 | 0.5 | P1 | T-702, T-302 | 6 | To Do |
