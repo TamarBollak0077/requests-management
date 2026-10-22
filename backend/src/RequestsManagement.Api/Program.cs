@@ -47,10 +47,8 @@ app.UseExceptionHandler();
 app.UseHttpsRedirection();
 app.MapControllers();
 
-app.Run();
-
 // ── Seed mode ────────────────────────────────────────────────────────────────
-// Run as:  dotnet run -- --seed [count]
+// Run as:  dotnet run --project src/RequestsManagement.Api -- --seed [count]
 // Exits after seeding; does NOT start the web server.
 if (args.Contains("--seed"))
 {
