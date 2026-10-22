@@ -45,7 +45,15 @@ public sealed class RequestQueryService(AppDbContext db) : IRequestQueryService
             query = query.Where(r => r.CreatedAt >= p.CreatedFrom.Value);
 
         if (p.CreatedTo.HasValue)
-            query = query.Where(r => r.CreatedAt <= p.CreatedTo.Value);
+        {
+            // The client sends a calendar date with no time (e.g. "2024-06-30" → midnight).
+            // Filtering with <= midnight excludes every record created after 00:00 on that day.
+            // Fix: advance to the exclusive start of the next day and use strict <.
+            // The constant is computed once in C# — no function is applied to the DB column,
+            // so the filter remains sargable on IX_Requests_CreatedAt.
+            var exclusiveUpperBound = p.CreatedTo.Value.Date.AddDays(1);
+            query = query.Where(r => r.CreatedAt < exclusiveUpperBound);
+        }
 
         if (!string.IsNullOrWhiteSpace(p.Search))
         {

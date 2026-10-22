@@ -102,23 +102,25 @@
     <!-- Sort + Reset row -->
     <div class="filter-actions">
 
-      <div class="sort-controls">
+      <div class="sort-group">
         <label class="filter-label" for="sortBy">Sort by</label>
-        <select id="sortBy" class="filter-select" [(ngModel)]="filters.sortBy" (change)="onImmediateChange()">
-          @for (sf of sortFields; track sf.value) {
-            <option [value]="sf.value">{{ sf.label }}</option>
-          }
-        </select>
-        <button
-          class="btn btn-dir"
-          type="button"
-          (click)="toggleSortDirection()"
-          [title]="filters.sortDirection === 'desc' ? 'Descending — click to switch to ascending' : 'Ascending — click to switch to descending'"
-          [attr.aria-label]="filters.sortDirection === 'desc' ? 'Sort descending' : 'Sort ascending'"
-        >
-          {{ filters.sortDirection === 'desc' ? '↓' : '↑' }}
-          {{ filters.sortDirection === 'desc' ? 'Desc' : 'Asc' }}
-        </button>
+        <div class="sort-inline">
+          <select id="sortBy" class="filter-select sort-select" [(ngModel)]="filters.sortBy" (change)="onImmediateChange()">
+            @for (sf of sortFields; track sf.value) {
+              <option [value]="sf.value">{{ sf.label }}</option>
+            }
+          </select>
+          <button
+            class="btn btn-dir"
+            type="button"
+            (click)="toggleSortDirection()"
+            [title]="filters.sortDirection === 'desc' ? 'Descending — click to switch to ascending' : 'Ascending — click to switch to descending'"
+            [attr.aria-label]="filters.sortDirection === 'desc' ? 'Sort descending' : 'Sort ascending'"
+          >
+            {{ filters.sortDirection === 'desc' ? '↓' : '↑' }}
+            {{ filters.sortDirection === 'desc' ? 'Desc' : 'Asc' }}
+          </button>
+        </div>
       </div>
 
       @if (activeFilterCount > 0) {
