@@ -1,13 +1,144 @@
+<div class="page-header">
+  <h1>Requests</h1>
+  @if (state$ | async; as state) {
+    @if (state.kind === 'loaded') {
+      <span class="total-count">{{ state.data.totalCount | number }} total</span>
+    }
+  }
+</div>
+
+<!-- ── Filter panel ───────────────────────────────────────────────────── -->
+<div class="filter-panel">
+  <div class="filter-grid">
+
+    <!-- Search -->
+    <div class="filter-group filter-group--wide">
+      <label class="filter-label" for="search">Search</label>
+      <input
+        id="search"
+        class="filter-input"
+        type="search"
+        placeholder="Title or organization…"
+        [(ngModel)]="filters.search"
+        (ngModelChange)="onTextChange()"
+      />
+    </div>
+
+    <!-- Status -->
+    <div class="filter-group">
+      <label class="filter-label" for="status">Status</label>
+      <select id="status" class="filter-select" [(ngModel)]="filters.status" (change)="onImmediateChange()">
+        <option value="">All statuses</option>
+        @for (s of statuses; track s) {
+          <option [value]="s">{{ s }}</option>
+        }
+      </select>
+    </div>
+
+    <!-- Priority -->
+    <div class="filter-group">
+      <label class="filter-label" for="priority">Priority</label>
+      <select id="priority" class="filter-select" [(ngModel)]="filters.priority" (change)="onImmediateChange()">
+        <option value="">All priorities</option>
+        @for (p of priorities; track p) {
+          <option [value]="p">{{ p }}</option>
+        }
+      </select>
+    </div>
+
+    <!-- Organization -->
+    <div class="filter-group">
+      <label class="filter-label" for="org">Organization</label>
+      <input
+        id="org"
+        class="filter-input"
+        type="text"
+        placeholder="Prefix match…"
+        [(ngModel)]="filters.organizationName"
+        (ngModelChange)="onTextChange()"
+      />
+    </div>
+
+    <!-- Assigned To -->
+    <div class="filter-group">
+      <label class="filter-label" for="assigned">Assigned to</label>
+      <input
+        id="assigned"
+        class="filter-input"
+        type="text"
+        placeholder="Exact match…"
+        [(ngModel)]="filters.assignedTo"
+        (ngModelChange)="onTextChange()"
+      />
+    </div>
+
+    <!-- Created From -->
+    <div class="filter-group">
+      <label class="filter-label" for="createdFrom">Created from</label>
+      <input
+        id="createdFrom"
+        class="filter-input"
+        type="date"
+        [(ngModel)]="filters.createdFrom"
+        (change)="onImmediateChange()"
+      />
+    </div>
+
+    <!-- Created To -->
+    <div class="filter-group">
+      <label class="filter-label" for="createdTo">Created to</label>
+      <input
+        id="createdTo"
+        class="filter-input"
+        type="date"
+        [(ngModel)]="filters.createdTo"
+        (change)="onImmediateChange()"
+      />
+    </div>
+
+  </div>
+
+  <!-- Sort + Reset row -->
+  <div class="filter-actions">
+
+    <div class="sort-controls">
+      <label class="filter-label" for="sortBy">Sort by</label>
+      <select id="sortBy" class="filter-select" [(ngModel)]="filters.sortBy" (change)="onImmediateChange()">
+        @for (sf of sortFields; track sf.value) {
+          <option [value]="sf.value">{{ sf.label }}</option>
+        }
+      </select>
+      <button
+        class="btn btn-dir"
+        type="button"
+        (click)="toggleSortDirection()"
+        [title]="filters.sortDirection === 'desc' ? 'Descending — click to switch to ascending' : 'Ascending — click to switch to descending'"
+        [attr.aria-label]="filters.sortDirection === 'desc' ? 'Sort descending' : 'Sort ascending'"
+      >
+        {{ filters.sortDirection === 'desc' ? '↓' : '↑' }}
+        {{ filters.sortDirection === 'desc' ? 'Desc' : 'Asc' }}
+      </button>
+    </div>
+
+    @if (activeFilterCount > 0) {
+      <button class="btn btn-reset" type="button" (click)="resetFilters()">
+        Clear filters ({{ activeFilterCount }})
+      </button>
+    }
+
+  </div>
+</div>
+
+<!-- ── Main content ───────────────────────────────────────────────────── -->
 @if (state$ | async; as state) {
-  <!-- Loading spinner -->
+
   @if (state.kind === 'loading') {
     <div class="state-center">
-      <div class="spinner" aria-label="Loading requests…"></div>
+      <div class="spinner" aria-label="Loading…"></div>
       <p>Loading requests…</p>
     </div>
   }
 
-  <!-- Error state -->
   @if (state.kind === 'error') {
     <div class="state-center error-box">
       <p>{{ state.message }}</p>
@@ -15,20 +146,16 @@
     </div>
   }
 
-  <!-- Empty state -->
   @if (state.kind === 'empty') {
     <div class="state-center">
-      <p>No requests found.</p>
+      <p>No requests match the current filters.</p>
+      @if (activeFilterCount > 0) {
+        <button class="btn" (click)="resetFilters()">Clear filters</button>
+      }
     </div>
   }
 
-  <!-- Data table -->
   @if (state.kind === 'loaded') {
-    <div class="page-header">
-      <h1>Requests</h1>
-      <span class="total-count">{{ state.data.totalCount | number }} total</span>
-    </div>
-
     <div class="table-wrapper">
       <table class="requests-table">
         <thead>
@@ -48,12 +175,8 @@
               <td class="id-cell">{{ req.id }}</td>
               <td class="title-cell">{{ req.title }}</td>
               <td>{{ req.organizationName }}</td>
-              <td>
-                <span class="badge" [class]="statusClass(req.status)">{{ req.status }}</span>
-              </td>
-              <td>
-                <span class="badge" [class]="priorityClass(req.priority)">{{ req.priority }}</span>
-              </td>
+              <td><span class="badge" [class]="statusClass(req.status)">{{ req.status }}</span></td>
+              <td><span class="badge" [class]="priorityClass(req.priority)">{{ req.priority }}</span></td>
               <td>{{ req.assignedTo ?? '—' }}</td>
               <td class="date-cell">{{ formatDate(req.createdAt) }}</td>
             </tr>
@@ -69,9 +192,7 @@
         [disabled]="currentPage <= 1"
         (click)="goToPage(currentPage - 1)"
         aria-label="Previous page"
-      >
-        ‹
-      </button>
+      >‹</button>
 
       @for (n of pageNumbers(state.data.totalPages); track n) {
         <button
@@ -79,9 +200,7 @@
           [class.active]="n === currentPage"
           (click)="goToPage(n)"
           [attr.aria-current]="n === currentPage ? 'page' : null"
-        >
-          {{ n }}
-        </button>
+        >{{ n }}</button>
       }
 
       <button
@@ -89,13 +208,9 @@
         [disabled]="currentPage >= state.data.totalPages"
         (click)="goToPage(currentPage + 1)"
         aria-label="Next page"
-      >
-        ›
-      </button>
+      >›</button>
 
-      <span class="page-info">
-        Page {{ state.data.page }} of {{ state.data.totalPages }}
-      </span>
+      <span class="page-info">Page {{ state.data.page }} of {{ state.data.totalPages }}</span>
     </nav>
   }
 }
