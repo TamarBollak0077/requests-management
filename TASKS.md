@@ -6,7 +6,7 @@
 | ׳׳•׳¢׳“ ׳”׳’׳©׳” | 28.10.2026 |
 | ׳×׳§׳¦׳™׳‘ ׳–׳׳ | 6 ׳™׳׳™ ׳¢׳‘׳•׳“׳” ֳ— **׳׳§׳¡׳™׳׳•׳ 2 ׳©׳¢׳•׳×** ׳‘׳™׳•׳ (12 ׳©׳¢׳•׳×). ׳‘׳™׳•׳ ׳”׳”׳’׳©׳” (28.10) ג€” ׳׳™׳׳•׳× ׳•׳”׳’׳©׳” ׳‘׳׳‘׳“ |
 | Stack | ASP.NET Core 8 Web API ֲ· EF Core 8 ֲ· SQL Server ֲ· Angular 20 ֲ· xUnit |
-| ׳¡׳˜׳˜׳•׳¡ ׳”׳×׳›׳ ׳•׳ | ׳׳•׳©׳¨ 22.10 ג€” ׳₪׳™׳×׳•׳— ׳׳×׳—׳™׳ |
+| ׳¡׳˜׳˜׳•׳¡ ׳”׳×׳›׳ ׳•׳ | Updated 22.10: Backend complete + Angular list/filter done + 3 bugs fixed; revised schedule in section 6 |
 
 **׳׳§׳¨׳**
 - **׳¢׳“׳™׳₪׳•׳×:** `P1` = ׳—׳•׳‘׳”, ׳׳™׳‘׳× ׳”׳ ׳™׳§׳•׳“, ׳׳ ׳ ׳—׳×׳›׳× ֲ· `P2` = ׳—׳•׳‘׳”/׳׳—׳–׳§ ׳¦׳™׳•׳, ׳ ׳™׳×׳ ׳׳¦׳׳¦׳ ׳”׳™׳§׳£ ֲ· `P3` = ׳¨׳©׳•׳× (Stretch), ׳¨׳§ ׳׳ ׳ ׳©׳׳¨ ׳–׳׳.
@@ -445,7 +445,7 @@ RequestsManagement/                (GitHub repo)
 - **AC:** `ng serve` ׳¢׳•׳׳”, ׳•׳§׳¨׳™׳׳” ׳-API ׳¢׳•׳‘׳¨׳× ׳“׳¨׳ ׳”-Proxy.
 
 #### T-702 ג€” ׳¢׳׳•׳“ ׳”׳¨׳©׳™׳׳” ֲ· 1.5׳©' ֲ· P1
-- **׳×׳™׳׳•׳¨:** `RequestsPageComponent` ׳׳—׳–׳™׳§ `BehaviorSubject` ׳©׳ ׳׳¦׳‘ ׳”׳©׳׳™׳׳×׳”. ׳”׳—׳™׳₪׳•׳© ׳¢׳•׳‘׳¨ `debounceTime(300)` ׳•-`distinctUntilChanged`. ׳׳¦׳‘ ׳”׳©׳׳™׳׳×׳” (׳₪׳™׳׳˜׳¨׳™׳, ׳׳™׳•׳, ׳“׳£) ׳ ׳›׳ ׳¡ ׳-`switchMap(api.getRequests)` ׳©׳׳‘׳˜׳ ׳‘׳§׳©׳” ׳§׳•׳“׳׳×. `catchError` ׳׳—׳–׳™׳¨ ׳׳¦׳‘ Error ׳‘׳׳™ ׳׳”׳₪׳™׳ ׳׳× ׳”-Stream. ׳׳¦׳‘׳™ `loading | loaded | empty | error` ׳׳•׳¦׳’׳™׳, ׳¢׳ ׳›׳₪׳×׳•׳¨ "׳ ׳¡׳” ׳©׳•׳‘". ׳©׳™׳ ׳•׳™ ׳₪׳™׳׳˜׳¨ ׳׳׳₪׳¡ ׳׳× ׳”׳“׳£ ׳-1. `RequestsFiltersComponent` ׳•-`RequestsTableComponent` ׳”׳ ׳¨׳›׳™׳‘׳™ ׳×׳¦׳•׳’׳” (Inputs/Outputs), ׳¢׳ ׳›׳•׳×׳¨׳•׳× ׳©׳׳™׳•׳ ׳•׳× ׳‘-Click ׳•׳“׳₪׳“׳•׳£. ׳¢׳™׳¦׳•׳‘: CSS ׳‘׳¡׳™׳¡׳™, ׳‘׳׳™ ׳¡׳₪׳¨׳™׳™׳× UI.
+- **׳×׳™׳׳•׳¨:** `RequestsPageComponent` ׳׳—׳–׳™׳§ `BehaviorSubject` ׳©׳ ׳׳¦׳‘ ׳”׳©׳׳™׳׳×׳”. ׳”׳—׳™׳₪׳•׳© ׳¢׳•׳‘׳¨ `debounceTime(300)` (no distinctUntilChanged -- removed; see bug fix log in section 6). ׳׳¦׳‘ ׳”׳©׳׳™׳׳×׳” (׳₪׳™׳׳˜׳¨׳™׳, ׳׳™׳•׳, ׳“׳£) ׳ ׳›׳ ׳¡ ׳-`switchMap(api.getRequests)` ׳©׳׳‘׳˜׳ ׳‘׳§׳©׳” ׳§׳•׳“׳׳×. `catchError` ׳׳—׳–׳™׳¨ ׳׳¦׳‘ Error ׳‘׳׳™ ׳׳”׳₪׳™׳ ׳׳× ׳”-Stream. ׳׳¦׳‘׳™ `loading | loaded | empty | error` ׳׳•׳¦׳’׳™׳, ׳¢׳ ׳›׳₪׳×׳•׳¨ "׳ ׳¡׳” ׳©׳•׳‘". ׳©׳™׳ ׳•׳™ ׳₪׳™׳׳˜׳¨ ׳׳׳₪׳¡ ׳׳× ׳”׳“׳£ ׳-1. `RequestsFiltersComponent` ׳•-`RequestsTableComponent` ׳”׳ ׳¨׳›׳™׳‘׳™ ׳×׳¦׳•׳’׳” (Inputs/Outputs), ׳¢׳ ׳›׳•׳×׳¨׳•׳× ׳©׳׳™׳•׳ ׳•׳× ׳‘-Click ׳•׳“׳₪׳“׳•׳£. ׳¢׳™׳¦׳•׳‘: CSS ׳‘׳¡׳™׳¡׳™, ׳‘׳׳™ ׳¡׳₪׳¨׳™׳™׳× UI.
 - **AC:** ׳‘-DevTools ׳¨׳•׳׳™׳ ׳©׳”׳§׳׳“׳” ׳׳”׳™׳¨׳” ׳©׳•׳׳—׳× ׳‘׳§׳©׳” ׳׳—׳×, ׳•׳‘׳§׳©׳•׳× ׳™׳©׳ ׳•׳× ׳׳‘׳•׳˜׳׳•׳× (Canceled); ׳›׳ ׳׳™׳•׳, ׳¡׳™׳ ׳•׳ ׳•׳“׳₪׳“׳•׳£ ׳©׳•׳׳— ׳₪׳¨׳׳˜׳¨׳™׳ ׳׳©׳¨׳×; ׳©׳׳•׳©׳× ׳”׳׳¦׳‘׳™׳ ׳׳•׳¦׳’׳™׳ ׳›׳ ׳“׳¨׳©.
 
 #### T-703 ג€” Summary panel ֲ· 0.25׳©' ֲ· P1
@@ -493,18 +493,14 @@ RequestsManagement/                (GitHub repo)
 
 | ׳™׳•׳ | ׳×׳׳¨׳™׳ | ׳׳§׳¡׳™׳׳•׳ | ׳ ׳•׳©׳ | ׳׳©׳™׳׳•׳× | ׳”׳¢׳¨׳›׳” |
 |---|---|---|---|---|---|
-| 0 | 22.10 | ג€” | ׳×׳›׳ ׳•׳ | T-000 | 0.5 (׳׳—׳•׳¥ ׳׳×׳§׳¦׳™׳‘) |
-| 1 | 23.10 | 2:00 | ׳×׳©׳×׳™׳× + ׳׳•׳“׳ ׳ ׳×׳•׳ ׳™׳ | T-101, T-102, T-103, T-304 | 1.5 |
-| 2 | 24.10 | 2:00 | Query API + Seeder | T-104, T-201, T-202, T-203 | 2.0 |
-| 2B | 22.10 | — | Filtering + Search + Sorting (Milestone 3B) | T-201, T-202 | 1.0 |
-| 2.5 | 24ג€“25.10 | ג€” | **Checkpoint:** GET ׳¢׳•׳‘׳“ ׳¢׳ 100K? ׳׳ ׳׳ ג€” ׳§׳™׳¦׳•׳¦׳™׳ | ג€” | ג€” |
-| 3 | 25.10 | 2:00 | Aggregations + Status Update + Audit | T-204, T-301, T-302, T-303 | 2.0 |
-| 3.5 | 25ג€“26.10 | ג€” | **Checkpoint Angular:** ׳׳¨׳’׳¢ ׳©-GET ׳¢׳•׳‘׳“ ג†’ T-701 ׳׳•׳§׳“׳ ׳׳ ׳׳₪׳©׳¨ | ג€” | ג€” |
-| 4 | 26.10 | 2:00 | Bulk + Cache + Angular Scaffold | T-401, T-501, T-701 | 2.0 |
-| 5 | 27.10 | 2:00 | Angular + ׳‘׳“׳™׳§׳•׳× + ׳‘׳™׳¦׳•׳¢׳™׳ | T-702, T-703, T-601, T-602, T-801 | 2.0 |
-| 6 | 28.10 | 2:00 | Angular ׳—׳׳§ 2 + ׳×׳™׳¢׳•׳“ | T-704, T-705, T-603, T-604, T-901, T-902 | 2.0 |
-| 6.5 | 28.10 | 0:30 | **Run-through + ׳”׳’׳©׳”** | T-903 | 0.5 |
-| Reserve | ׳׳₪׳™ ׳”׳¦׳•׳¨׳ | ג€” | | T-605, T-606, T-706 | 0.75 |
+| 0 | 22.10 | -- | **DONE on day 0** -- T-000..T-702 + 3 bug fixes; manual verification passed | T-000, T-101..T-104, T-304, T-201..T-203, T-301, T-701, T-702 | -- (AI-assisted) |
+| 1 | 23.10 | 2:00 | Aggregations + Status Update + Audit | T-204, T-302, T-303 | 1.25 |
+| 2 | 24.10 | 2:00 | Bulk + Cache + Summary panel (Angular) | T-401, T-501, T-703 | 1.5 |
+| 3 | 25.10 | 2:00 | Tests: infra + unit + integration (filtering) | T-601, T-602, T-603 | 1.0 |
+| 4 | 26.10 | 2:00 | Tests: Concurrency + Performance measurement | T-604, T-801 | 1.25 |
+| 5 | 27.10 | 2:00 | Angular part 2 + README | T-704, T-705, T-901 | 1.5 |
+| 6 | 28.10 | 1:30 | decisions.md + Run-through + Push | T-902, T-903 | 1.0 |
+| Reserve | -- | -- | | T-605, T-606, T-706 | 0.75 |
 
 **׳©׳™׳₪׳•׳¨׳™׳ ׳׳¢׳•׳׳× ׳”׳’׳¨׳¡׳” ׳”׳§׳•׳“׳׳×**
 - **Angular ׳׳×׳—׳™׳ ׳‘׳™׳•׳ 4** (׳‘׳¨׳’׳¢ ׳©׳™׳© GET) ׳‘׳׳§׳•׳ ׳‘׳™׳•׳ 5.
@@ -521,6 +517,54 @@ RequestsManagement/                (GitHub repo)
 - **׳¡׳•׳£ ׳™׳•׳ 4:** Status Update + Bulk ׳¢׳•׳‘׳“׳™׳. Angular Scaffold ׳׳•׳›׳.
 - **׳¡׳•׳£ ׳™׳•׳ 5:** `dotnet test` ׳™׳¨׳•׳§, Angular ׳׳¦׳™׳’ ׳¨׳©׳™׳׳” ׳¢׳ ׳₪׳™׳׳˜׳¨׳™׳.
 - **28.10 ׳‘׳‘׳•׳§׳¨:** ׳׳ ׳”-Backend ׳׳׳ ג€” ׳׳×׳׳§׳“׳™׳ ׳‘-UI ׳•׳‘׳×׳™׳¢׳•׳“. ׳׳ ׳׳ ג€” ׳׳•׳•׳×׳¨׳™׳ ׳¢׳ P3.
+
+---
+
+---
+
+## 6.1 Work Log -- 22.10.2026 (actual)
+
+All work below was completed on Oct 22 (day 0), ahead of the original schedule.
+Implementation was AI-assisted (Claude Sonnet 4.6); every diff was reviewed manually
+before commit.
+
+### Commits (verified from git log)
+
+| Hash | Message |
+|---|---|
+| 7c8a9e7 | T-101, T-102: Solution scaffold + Domain model + EF Core setup |
+| f034f1e | T-103, T-304: Database indexes + Global error handling |
+| 4251046 | T-104: Deterministic 100K seeder -- bug fix and verified |
+| e6ebb38 | T-201/T-202/T-203 (partial): GET /api/requests with pagination |
+| 2d02ba3 | feat(query): filtering, search, sorting -- Milestone 3B |
+| b23fcc8 | feat(angular): Angular 20 requests list UI -- Milestone 4A |
+| d189d4a | feat(angular): filter, search, sort controls -- Milestone 4B |
+| 0052ab9 | fix(angular): duplicate async-pipe + void distinctUntilChanged |
+
+### Three defects found and fixed
+
+| # | Defect | Root cause | Fix |
+|---|---|---|---|
+| BF-1 | `Subject<void>` + `distinctUntilChanged` suppressed all search emissions after the first | `distinctUntilChanged` compares `undefined === undefined` -- always true, so every emission after the first is swallowed | Removed `distinctUntilChanged` from the text-change pipe (commit 0052ab9) |
+| BF-2 | Two `state$ \| async` subscriptions in HTML caused two HTTP calls per filter change | Total-count badge and main content each had their own `@if (state$ \| async; as state)` block | Wrapped entire template in a single outer `@if`; inner state references use the captured `state` variable (commit 0052ab9) |
+| BF-3 | `createdTo=2024-06-30` excluded all records created after midnight on June 30 | Angular `type="date"` sends `YYYY-MM-DD`; ASP.NET model-binds it as midnight; `<= midnight` excludes the rest of the day | Changed to exclusive upper bound: `exclusiveUpperBound = createdTo.Date.AddDays(1)`; filter becomes `CreatedAt < exclusiveUpperBound` (sargable, no function on column) |
+
+### Manual verification performed (22.10)
+
+- Repeated free-text searches with debounce: single HTTP request per settled input confirmed in DevTools Network tab.
+- Combined filters (Status + Priority + date range + search): results matched expected subset.
+- Sort by Created date / Priority / Title, Asc and Desc: correct ordering confirmed.
+- Pagination: page navigation resets on filter change; current page preserved on sort-only change.
+- Reset filters: all controls clear, full result set restored, single HTTP call.
+- One HTTP request per filter change: stale requests cancelled (status "Canceled" in Network tab).
+- Inclusive `createdTo` fix: set `createdTo = 2024-06-30`; records created on June 30 at times > 00:00 now appear; July 1 records absent.
+
+### Non-coding work
+
+- Code review of every generated diff before commit.
+- Debugging duplicate subscription bug: traced via DevTools and RxJS pipe analysis.
+- Debugging `distinctUntilChanged` suppression: identified via manual test (search worked once then stopped).
+- AI-assisted implementation throughout; all prompts written and reviewed by developer.
 
 ---
 
