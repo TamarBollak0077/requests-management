@@ -295,8 +295,8 @@ RequestsManagement/                (GitHub repo)
 | T-104 | Seeder ׳-100,000 ׳¨׳©׳•׳׳•׳× ׳©׳׳₪׳©׳¨ ׳׳”׳¨׳™׳¥ ׳׳—׳“׳© | E1 | 0.5 | P1 | T-102 | 1 | Done  |
 | T-304 | Global error handling, ProblemDetails, Logging | E3 | 0.25 | P1 | T-101 | 1 | Done  |
 | T-201 | Query DTOs, ׳₪׳¨׳׳˜׳¨׳™׳ ׳•-Validation | E2 Query API | 0.5 | P1 | T-102 | 2 | Done  |
-| T-202 | RequestQueryService: ׳¡׳™׳ ׳•׳, ׳—׳™׳₪׳•׳©, ׳׳™׳•׳, ׳“׳₪׳“׳•׳£ | E2 | 0.75 | P1 | T-201 | 2 | In Progress |
-| T-203 | RequestsController: GET list ׳•-GET by id | E2 | 0.25 | P1 | T-202 | 2 | In Progress |
+| T-202 | RequestQueryService: filtering, search, sort | E2 | 0.75 | P1 | T-201 | 2 | Done |
+| T-203 | RequestsController: GET list | E2 | 0.25 | P1 | T-202 | 2 | Done |
 | T-204 | Aggregations endpoint | E2 | 0.25 | P1 | T-202 | 2 | In Progress |
 | T-301 | StatusTransitionPolicy | E3 Update & Audit | 0.25 | P1 | T-102 | 2 | Done  |
 | T-302 | ׳¢׳“׳›׳•׳ ׳¡׳˜׳˜׳•׳¡ ׳‘׳•׳“׳“: Concurrency ׳•-Audit | E3 | 0.75 | P1 | T-301, T-304 | 3 | To Do |
@@ -496,6 +496,7 @@ RequestsManagement/                (GitHub repo)
 | 0 | 22.10 | ג€” | ׳×׳›׳ ׳•׳ | T-000 | 0.5 (׳׳—׳•׳¥ ׳׳×׳§׳¦׳™׳‘) |
 | 1 | 23.10 | 2:00 | ׳×׳©׳×׳™׳× + ׳׳•׳“׳ ׳ ׳×׳•׳ ׳™׳ | T-101, T-102, T-103, T-304 | 1.5 |
 | 2 | 24.10 | 2:00 | Query API + Seeder | T-104, T-201, T-202, T-203 | 2.0 |
+| 2B | 22.10 | — | Filtering + Search + Sorting (Milestone 3B) | T-201, T-202 | 1.0 |
 | 2.5 | 24ג€“25.10 | ג€” | **Checkpoint:** GET ׳¢׳•׳‘׳“ ׳¢׳ 100K? ׳׳ ׳׳ ג€” ׳§׳™׳¦׳•׳¦׳™׳ | ג€” | ג€” |
 | 3 | 25.10 | 2:00 | Aggregations + Status Update + Audit | T-204, T-301, T-302, T-303 | 2.0 |
 | 3.5 | 25ג€“26.10 | ג€” | **Checkpoint Angular:** ׳׳¨׳’׳¢ ׳©-GET ׳¢׳•׳‘׳“ ג†’ T-701 ׳׳•׳§׳“׳ ׳׳ ׳׳₪׳©׳¨ | ג€” | ג€” |
