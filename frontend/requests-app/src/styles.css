@@ -1,0 +1,31 @@
+/* ── Design tokens ───────────────────────────────────────────────────── */
+:root {
+  --surface:      #ffffff;
+  --surface-alt:  #f8fafc;
+  --surface-hover:#f1f5f9;
+  --border:       #e2e8f0;
+  --text:         #0f172a;
+  --text-muted:   #64748b;
+  --accent:       #3b82f6;
+}
+
+/* ── Reset ───────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: system-ui, -apple-system, sans-serif;
+  background: var(--surface-alt);
+  color: var(--text);
+  line-height: 1.5;
+}
+
+/* ── App shell ───────────────────────────────────────────────────────── */
+.app-shell {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem 1rem 3rem;
+}
+
+@media (min-width: 640px) {
+  .app-shell { padding: 2rem 1.5rem 3rem; }
+}

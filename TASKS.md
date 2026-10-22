@@ -308,8 +308,8 @@ RequestsManagement/                (GitHub repo)
 | T-603 | Integration: ׳©׳׳™׳₪׳”, ׳¡׳™׳ ׳•׳ ׳•׳“׳₪׳“׳•׳£ | E6 | 0.25 | P1 | T-601 | 4 | To Do |
 | T-604 | Integration: Concurrency Conflict ׳•-Audit | E6 | 0.5 | P1 | T-601, T-302 | 4 | To Do |
 | T-801 | ׳׳“׳™׳“׳× ׳‘׳™׳¦׳•׳¢׳™׳ ׳•-docs/performance.md | E8 Perf | 0.75 | P1 | T-104, T-203, T-204 | 4 | To Do |
-| T-701 | Angular scaffold, Proxy, Models, ApiService | E7 Angular | 0.5 | P1 | T-203 | 5 | In Progress |
-| T-702 | ׳¢׳׳•׳“ ׳”׳¨׳©׳™׳׳”: RxJS Pipeline ׳•׳׳¦׳‘׳™ UI | E7 | 1.5 | P1 | T-701 | 5 | To Do |
+| T-701 | Angular scaffold, Proxy, Models, ApiService | E7 Angular | 0.5 | P1 | T-203 | 4 | Done |
+| T-702 | RequestsPageComponent: RxJS switchMap pipeline | E7 | 1.5 | P1 | T-701 | 4 | Done |
 | T-703 | Summary panel | E7 | 0.25 | P1 | T-701, T-204 | 5 | To Do |
 | T-704 | ׳¢׳“׳›׳•׳ ׳¡׳˜׳˜׳•׳¡ ׳•׳˜׳™׳₪׳•׳ ׳‘-409 ׳‘-UI | E7 | 0.5 | P1 | T-702, T-302 | 6 | To Do |
 | T-705 | ׳×׳¦׳•׳’׳× ׳”׳™׳¡׳˜׳•׳¨׳™׳” | E7 | 0.5 | P1 | T-702, T-303 | 6 | To Do |

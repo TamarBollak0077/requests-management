@@ -1,0 +1,165 @@
+/* ── Layout ──────────────────────────────────────────────────────────── */
+
+.page-header {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.page-header h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.total-count {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+/* ── Table ───────────────────────────────────────────────────────────── */
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.requests-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.requests-table th,
+.requests-table td {
+  padding: 0.6rem 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.requests-table th {
+  background: var(--surface-alt);
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.requests-table tbody tr:hover {
+  background: var(--surface-hover);
+}
+
+.id-cell {
+  color: var(--text-muted);
+  width: 3.5rem;
+}
+
+.title-cell {
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.date-cell {
+  white-space: nowrap;
+}
+
+/* ── Badges ──────────────────────────────────────────────────────────── */
+
+.badge {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* Status */
+.status-new         { background: #dbeafe; color: #1e40af; }
+.status-inprogress  { background: #fef9c3; color: #92400e; }
+.status-waiting     { background: #ede9fe; color: #5b21b6; }
+.status-completed   { background: #dcfce7; color: #166534; }
+
+/* Priority */
+.priority-low    { background: #f0fdf4; color: #166534; }
+.priority-medium { background: #fef3c7; color: #92400e; }
+.priority-high   { background: #fee2e2; color: #991b1b; }
+
+/* ── Pagination ──────────────────────────────────────────────────────── */
+
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-top: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.btn {
+  padding: 0.4rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--surface);
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: var(--text);
+  transition: background 0.12s;
+}
+
+.btn:hover:not(:disabled) {
+  background: var(--surface-alt);
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-page.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+.page-info {
+  margin-left: 0.5rem;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+/* ── States ──────────────────────────────────────────────────────────── */
+
+.state-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 4rem 1rem;
+  color: var(--text-muted);
+}
+
+.error-box {
+  color: #991b1b;
+  background: #fee2e2;
+  border-radius: 8px;
+  padding: 2rem;
+}
+
+/* ── Spinner ─────────────────────────────────────────────────────────── */
+
+.spinner {
+  width: 2rem;
+  height: 2rem;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

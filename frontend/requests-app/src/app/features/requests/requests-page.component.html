@@ -1,0 +1,101 @@
+@if (state$ | async; as state) {
+  <!-- Loading spinner -->
+  @if (state.kind === 'loading') {
+    <div class="state-center">
+      <div class="spinner" aria-label="Loading requests…"></div>
+      <p>Loading requests…</p>
+    </div>
+  }
+
+  <!-- Error state -->
+  @if (state.kind === 'error') {
+    <div class="state-center error-box">
+      <p>{{ state.message }}</p>
+      <button class="btn" (click)="retry()">Retry</button>
+    </div>
+  }
+
+  <!-- Empty state -->
+  @if (state.kind === 'empty') {
+    <div class="state-center">
+      <p>No requests found.</p>
+    </div>
+  }
+
+  <!-- Data table -->
+  @if (state.kind === 'loaded') {
+    <div class="page-header">
+      <h1>Requests</h1>
+      <span class="total-count">{{ state.data.totalCount | number }} total</span>
+    </div>
+
+    <div class="table-wrapper">
+      <table class="requests-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Title</th>
+            <th>Organization</th>
+            <th>Status</th>
+            <th>Priority</th>
+            <th>Assigned To</th>
+            <th>Created</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (req of state.data.items; track req.id) {
+            <tr>
+              <td class="id-cell">{{ req.id }}</td>
+              <td class="title-cell">{{ req.title }}</td>
+              <td>{{ req.organizationName }}</td>
+              <td>
+                <span class="badge" [class]="statusClass(req.status)">{{ req.status }}</span>
+              </td>
+              <td>
+                <span class="badge" [class]="priorityClass(req.priority)">{{ req.priority }}</span>
+              </td>
+              <td>{{ req.assignedTo ?? '—' }}</td>
+              <td class="date-cell">{{ formatDate(req.createdAt) }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <nav class="pagination" aria-label="Page navigation">
+      <button
+        class="btn btn-page"
+        [disabled]="currentPage <= 1"
+        (click)="goToPage(currentPage - 1)"
+        aria-label="Previous page"
+      >
+        ‹
+      </button>
+
+      @for (n of pageNumbers(state.data.totalPages); track n) {
+        <button
+          class="btn btn-page"
+          [class.active]="n === currentPage"
+          (click)="goToPage(n)"
+          [attr.aria-current]="n === currentPage ? 'page' : null"
+        >
+          {{ n }}
+        </button>
+      }
+
+      <button
+        class="btn btn-page"
+        [disabled]="currentPage >= state.data.totalPages"
+        (click)="goToPage(currentPage + 1)"
+        aria-label="Next page"
+      >
+        ›
+      </button>
+
+      <span class="page-info">
+        Page {{ state.data.page }} of {{ state.data.totalPages }}
+      </span>
+    </nav>
+  }
+}
