@@ -15,27 +15,27 @@ type LoadState =
 // All filter/sort fields as a plain object — separate from pagination.
 // This is the "form state"; params$ is the derived "query state".
 interface FilterState {
-  status:           RequestStatus | '';
-  priority:         RequestPriority | '';
+  status: RequestStatus | '';
+  priority: RequestPriority | '';
   organizationName: string;
-  assignedTo:       string;
-  createdFrom:      string;
-  createdTo:        string;
-  search:           string;
-  sortBy:           SortBy;
-  sortDirection:    SortDirection;
+  assignedTo: string;
+  createdFrom: string;
+  createdTo: string;
+  search: string;
+  sortBy: SortBy;
+  sortDirection: SortDirection;
 }
 
 const DEFAULT_FILTERS: FilterState = {
-  status:           '',
-  priority:         '',
+  status: '',
+  priority: '',
   organizationName: '',
-  assignedTo:       '',
-  createdFrom:      '',
-  createdTo:        '',
-  search:           '',
-  sortBy:           'createdAt',
-  sortDirection:    'desc',
+  assignedTo: '',
+  createdFrom: '',
+  createdTo: '',
+  search: '',
+  sortBy: 'createdAt',
+  sortDirection: 'desc',
 };
 
 @Component({
@@ -56,12 +56,12 @@ export class RequestsPageComponent {
   filters: FilterState = { ...DEFAULT_FILTERS };
 
   // Exposed for the template select/option lists
-  readonly statuses: RequestStatus[]  = ['New', 'InProgress', 'Waiting', 'Completed'];
+  readonly statuses: RequestStatus[] = ['New', 'InProgress', 'Waiting', 'Completed'];
   readonly priorities: RequestPriority[] = ['Low', 'Medium', 'High'];
   readonly sortFields: { value: SortBy; label: string }[] = [
     { value: 'createdAt', label: 'Created date' },
-    { value: 'priority',  label: 'Priority' },
-    { value: 'title',     label: 'Title' },
+    { value: 'priority', label: 'Priority' },
+    { value: 'title', label: 'Title' },
   ];
 
   // ── RxJS pipeline ────────────────────────────────────────────────────
@@ -101,7 +101,10 @@ export class RequestsPageComponent {
     // takeUntilDestroyed() — called in injection context (constructor) —
     // auto-injects DestroyRef and unsubscribes when the component is destroyed.
     this.textChange$
-      .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed())
+      .pipe(
+        debounceTime(300),
+        takeUntilDestroyed()
+      )
       .subscribe(() => this.params$.next(this.buildParams(1)));
   }
 
@@ -154,12 +157,12 @@ export class RequestsPageComponent {
     const current = this.currentPage;
     const delta = 2;
     const start = Math.max(1, current - delta);
-    const end   = Math.min(totalPages, current + delta);
+    const end = Math.min(totalPages, current + delta);
     return Array.from({ length: end - start + 1 }, (_, i) => start + i);
   }
 
   priorityClass(priority: string): string { return `priority-${priority.toLowerCase()}`; }
-  statusClass(status: string): string     { return `status-${status.toLowerCase()}`; }
+  statusClass(status: string): string { return `status-${status.toLowerCase()}`; }
 
   formatDate(isoString: string): string {
     return new Date(isoString).toLocaleDateString('en-GB', {
@@ -172,15 +175,15 @@ export class RequestsPageComponent {
     return {
       page,
       pageSize: this.pageSize,
-      ...(f.status            && { status:           f.status }),
-      ...(f.priority          && { priority:         f.priority }),
+      ...(f.status && { status: f.status }),
+      ...(f.priority && { priority: f.priority }),
       ...(f.organizationName.trim() && { organizationName: f.organizationName.trim() }),
-      ...(f.assignedTo.trim() && { assignedTo:       f.assignedTo.trim() }),
-      ...(f.createdFrom       && { createdFrom:      f.createdFrom }),
-      ...(f.createdTo         && { createdTo:        f.createdTo }),
-      ...(f.search.trim()     && { search:           f.search.trim() }),
-      sortBy:           f.sortBy,
-      sortDirection:    f.sortDirection,
+      ...(f.assignedTo.trim() && { assignedTo: f.assignedTo.trim() }),
+      ...(f.createdFrom && { createdFrom: f.createdFrom }),
+      ...(f.createdTo && { createdTo: f.createdTo }),
+      ...(f.search.trim() && { search: f.search.trim() }),
+      sortBy: f.sortBy,
+      sortDirection: f.sortDirection,
     };
   }
 }

@@ -1,136 +1,136 @@
-<div class="page-header">
-  <h1>Requests</h1>
-  @if (state$ | async; as state) {
+@if (state$ | async; as state) {
+
+  <!-- ── Page header ──────────────────────────────────────────────────── -->
+  <div class="page-header">
+    <h1>Requests</h1>
     @if (state.kind === 'loaded') {
       <span class="total-count">{{ state.data.totalCount | number }} total</span>
     }
-  }
-</div>
-
-<!-- ── Filter panel ───────────────────────────────────────────────────── -->
-<div class="filter-panel">
-  <div class="filter-grid">
-
-    <!-- Search -->
-    <div class="filter-group filter-group--wide">
-      <label class="filter-label" for="search">Search</label>
-      <input
-        id="search"
-        class="filter-input"
-        type="search"
-        placeholder="Title or organization…"
-        [(ngModel)]="filters.search"
-        (ngModelChange)="onTextChange()"
-      />
-    </div>
-
-    <!-- Status -->
-    <div class="filter-group">
-      <label class="filter-label" for="status">Status</label>
-      <select id="status" class="filter-select" [(ngModel)]="filters.status" (change)="onImmediateChange()">
-        <option value="">All statuses</option>
-        @for (s of statuses; track s) {
-          <option [value]="s">{{ s }}</option>
-        }
-      </select>
-    </div>
-
-    <!-- Priority -->
-    <div class="filter-group">
-      <label class="filter-label" for="priority">Priority</label>
-      <select id="priority" class="filter-select" [(ngModel)]="filters.priority" (change)="onImmediateChange()">
-        <option value="">All priorities</option>
-        @for (p of priorities; track p) {
-          <option [value]="p">{{ p }}</option>
-        }
-      </select>
-    </div>
-
-    <!-- Organization -->
-    <div class="filter-group">
-      <label class="filter-label" for="org">Organization</label>
-      <input
-        id="org"
-        class="filter-input"
-        type="text"
-        placeholder="Prefix match…"
-        [(ngModel)]="filters.organizationName"
-        (ngModelChange)="onTextChange()"
-      />
-    </div>
-
-    <!-- Assigned To -->
-    <div class="filter-group">
-      <label class="filter-label" for="assigned">Assigned to</label>
-      <input
-        id="assigned"
-        class="filter-input"
-        type="text"
-        placeholder="Exact match…"
-        [(ngModel)]="filters.assignedTo"
-        (ngModelChange)="onTextChange()"
-      />
-    </div>
-
-    <!-- Created From -->
-    <div class="filter-group">
-      <label class="filter-label" for="createdFrom">Created from</label>
-      <input
-        id="createdFrom"
-        class="filter-input"
-        type="date"
-        [(ngModel)]="filters.createdFrom"
-        (change)="onImmediateChange()"
-      />
-    </div>
-
-    <!-- Created To -->
-    <div class="filter-group">
-      <label class="filter-label" for="createdTo">Created to</label>
-      <input
-        id="createdTo"
-        class="filter-input"
-        type="date"
-        [(ngModel)]="filters.createdTo"
-        (change)="onImmediateChange()"
-      />
-    </div>
-
   </div>
 
-  <!-- Sort + Reset row -->
-  <div class="filter-actions">
+  <!-- ── Filter panel (always visible — state$ startWith emits synchronously) -->
+  <div class="filter-panel">
+    <div class="filter-grid">
 
-    <div class="sort-controls">
-      <label class="filter-label" for="sortBy">Sort by</label>
-      <select id="sortBy" class="filter-select" [(ngModel)]="filters.sortBy" (change)="onImmediateChange()">
-        @for (sf of sortFields; track sf.value) {
-          <option [value]="sf.value">{{ sf.label }}</option>
-        }
-      </select>
-      <button
-        class="btn btn-dir"
-        type="button"
-        (click)="toggleSortDirection()"
-        [title]="filters.sortDirection === 'desc' ? 'Descending — click to switch to ascending' : 'Ascending — click to switch to descending'"
-        [attr.aria-label]="filters.sortDirection === 'desc' ? 'Sort descending' : 'Sort ascending'"
-      >
-        {{ filters.sortDirection === 'desc' ? '↓' : '↑' }}
-        {{ filters.sortDirection === 'desc' ? 'Desc' : 'Asc' }}
-      </button>
+      <!-- Search -->
+      <div class="filter-group filter-group--wide">
+        <label class="filter-label" for="search">Search</label>
+        <input
+          id="search"
+          class="filter-input"
+          type="search"
+          placeholder="Title or organization…"
+          [(ngModel)]="filters.search"
+          (ngModelChange)="onTextChange()"
+        />
+      </div>
+
+      <!-- Status -->
+      <div class="filter-group">
+        <label class="filter-label" for="status">Status</label>
+        <select id="status" class="filter-select" [(ngModel)]="filters.status" (change)="onImmediateChange()">
+          <option value="">All statuses</option>
+          @for (s of statuses; track s) {
+            <option [value]="s">{{ s }}</option>
+          }
+        </select>
+      </div>
+
+      <!-- Priority -->
+      <div class="filter-group">
+        <label class="filter-label" for="priority">Priority</label>
+        <select id="priority" class="filter-select" [(ngModel)]="filters.priority" (change)="onImmediateChange()">
+          <option value="">All priorities</option>
+          @for (p of priorities; track p) {
+            <option [value]="p">{{ p }}</option>
+          }
+        </select>
+      </div>
+
+      <!-- Organization -->
+      <div class="filter-group">
+        <label class="filter-label" for="org">Organization</label>
+        <input
+          id="org"
+          class="filter-input"
+          type="text"
+          placeholder="Prefix match…"
+          [(ngModel)]="filters.organizationName"
+          (ngModelChange)="onTextChange()"
+        />
+      </div>
+
+      <!-- Assigned To -->
+      <div class="filter-group">
+        <label class="filter-label" for="assigned">Assigned to</label>
+        <input
+          id="assigned"
+          class="filter-input"
+          type="text"
+          placeholder="Exact match…"
+          [(ngModel)]="filters.assignedTo"
+          (ngModelChange)="onTextChange()"
+        />
+      </div>
+
+      <!-- Created From -->
+      <div class="filter-group">
+        <label class="filter-label" for="createdFrom">Created from</label>
+        <input
+          id="createdFrom"
+          class="filter-input"
+          type="date"
+          [(ngModel)]="filters.createdFrom"
+          (change)="onImmediateChange()"
+        />
+      </div>
+
+      <!-- Created To -->
+      <div class="filter-group">
+        <label class="filter-label" for="createdTo">Created to</label>
+        <input
+          id="createdTo"
+          class="filter-input"
+          type="date"
+          [(ngModel)]="filters.createdTo"
+          (change)="onImmediateChange()"
+        />
+      </div>
+
     </div>
 
-    @if (activeFilterCount > 0) {
-      <button class="btn btn-reset" type="button" (click)="resetFilters()">
-        Clear filters ({{ activeFilterCount }})
-      </button>
-    }
+    <!-- Sort + Reset row -->
+    <div class="filter-actions">
 
+      <div class="sort-controls">
+        <label class="filter-label" for="sortBy">Sort by</label>
+        <select id="sortBy" class="filter-select" [(ngModel)]="filters.sortBy" (change)="onImmediateChange()">
+          @for (sf of sortFields; track sf.value) {
+            <option [value]="sf.value">{{ sf.label }}</option>
+          }
+        </select>
+        <button
+          class="btn btn-dir"
+          type="button"
+          (click)="toggleSortDirection()"
+          [title]="filters.sortDirection === 'desc' ? 'Descending — click to switch to ascending' : 'Ascending — click to switch to descending'"
+          [attr.aria-label]="filters.sortDirection === 'desc' ? 'Sort descending' : 'Sort ascending'"
+        >
+          {{ filters.sortDirection === 'desc' ? '↓' : '↑' }}
+          {{ filters.sortDirection === 'desc' ? 'Desc' : 'Asc' }}
+        </button>
+      </div>
+
+      @if (activeFilterCount > 0) {
+        <button class="btn btn-reset" type="button" (click)="resetFilters()">
+          Clear filters ({{ activeFilterCount }})
+        </button>
+      }
+
+    </div>
   </div>
-</div>
 
-<!-- ── Main content ───────────────────────────────────────────────────── -->
-@if (state$ | async; as state) {
+  <!-- ── State-specific content ────────────────────────────────────────── -->
 
   @if (state.kind === 'loading') {
     <div class="state-center">
@@ -213,4 +213,5 @@
       <span class="page-info">Page {{ state.data.page }} of {{ state.data.totalPages }}</span>
     </nav>
   }
+
 }
