@@ -1,5 +1,9 @@
 export type RequestStatus = 'New' | 'InProgress' | 'Waiting' | 'Completed';
 export type RequestPriority = 'Low' | 'Medium' | 'High';
+
+export interface StatusCount { status: RequestStatus; count: number; }
+export interface PriorityCount { priority: RequestPriority; count: number; }
+export interface RequestSummary { byStatus: StatusCount[]; byPriority: PriorityCount[]; }
 export type SortBy = 'createdAt' | 'priority' | 'title';
 export type SortDirection = 'asc' | 'desc';
 

@@ -5,6 +5,7 @@ import { BehaviorSubject, Subject, switchMap, catchError, of, startWith, map, de
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RequestsApiService } from '../../core/services/requests-api.service';
 import { PagedResult, RequestListItem, RequestQueryParams, RequestStatus, RequestPriority, SortBy, SortDirection } from '../../core/models/request.model';
+import { SummaryPanelComponent } from './summary-panel/summary-panel.component';
 
 type LoadState =
   | { kind: 'loading' }
@@ -41,7 +42,7 @@ const DEFAULT_FILTERS: FilterState = {
 @Component({
   selector: 'app-requests-page',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, SummaryPanelComponent],
   templateUrl: './requests-page.component.html',
   styleUrl: './requests-page.component.css',
 })
@@ -49,6 +50,12 @@ export class RequestsPageComponent {
   private readonly api = inject(RequestsApiService);
 
   readonly pageSize = 20;
+
+  /**
+   * Emit here after a successful status update (T-704) to refresh the summary panel.
+   * The panel subscribes to this via its refreshTrigger$ input.
+   */
+  readonly summaryRefresh$ = new Subject<void>();
 
   // ── Filter form state ────────────────────────────────────────────────
   // Mutable object bound via [(ngModel)].  Not directly in params$ so

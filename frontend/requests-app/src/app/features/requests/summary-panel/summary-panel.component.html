@@ -1,0 +1,49 @@
+<div class="summary-panel">
+
+  @if (state.kind === 'loading') {
+    <div class="summary-loading" aria-live="polite" aria-label="Loading summary…">
+      <span class="summary-spinner"></span>
+      <span class="summary-loading-text">Loading summary…</span>
+    </div>
+  }
+
+  @if (state.kind === 'error') {
+    <div class="summary-error" role="alert">
+      <span>Could not load summary.</span>
+      <button class="summary-retry-btn" type="button" (click)="retry()">Retry</button>
+    </div>
+  }
+
+  @if (state.kind === 'loaded') {
+    <div class="summary-groups">
+
+      <!-- By Status -->
+      <div class="summary-group">
+        <span class="summary-group-label">By Status</span>
+        <div class="summary-chips">
+          @for (item of state.summary.byStatus; track item.status) {
+            <span class="summary-chip" [ngClass]="statusClass(item.status)">
+              <span class="chip-label">{{ item.status }}</span>
+              <span class="chip-count">{{ item.count | number }}</span>
+            </span>
+          }
+        </div>
+      </div>
+
+      <!-- By Priority -->
+      <div class="summary-group">
+        <span class="summary-group-label">By Priority</span>
+        <div class="summary-chips">
+          @for (item of state.summary.byPriority; track item.priority) {
+            <span class="summary-chip" [ngClass]="priorityClass(item.priority)">
+              <span class="chip-label">{{ item.priority }}</span>
+              <span class="chip-count">{{ item.count | number }}</span>
+            </span>
+          }
+        </div>
+      </div>
+
+    </div>
+  }
+
+</div>

@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { PagedResult, RequestListItem, RequestQueryParams } from '../models/request.model';
+import { PagedResult, RequestListItem, RequestQueryParams, RequestSummary } from '../models/request.model';
 
 @Injectable({ providedIn: 'root' })
 export class RequestsApiService {
@@ -25,5 +25,9 @@ export class RequestsApiService {
     if (params.sortDirection)    p = p.set('sortDirection',    params.sortDirection);
 
     return this.http.get<PagedResult<RequestListItem>>('/api/requests', { params: p });
+  }
+
+  getSummary(): Observable<RequestSummary> {
+    return this.http.get<RequestSummary>('/api/requests/summary');
   }
 }

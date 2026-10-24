@@ -8,6 +8,9 @@
     }
   </div>
 
+  <!-- ── Summary panel ──────────────────────────────────────────────────── -->
+  <app-summary-panel [refreshTrigger$]="summaryRefresh$" />
+
   <!-- ── Filter panel (always visible — state$ startWith emits synchronously) -->
   <div class="filter-panel">
     <div class="filter-grid">

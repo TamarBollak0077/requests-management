@@ -1,0 +1,118 @@
+.summary-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.25rem;
+  min-height: 2.75rem;
+  display: flex;
+  align-items: center;
+}
+
+/* ── Loading ──────────────────────────────────────────────────────────── */
+
+.summary-loading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.summary-spinner {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: summary-spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes summary-spin { to { transform: rotate(360deg); } }
+
+.summary-loading-text { color: var(--text-muted); }
+
+/* ── Error ────────────────────────────────────────────────────────────── */
+
+.summary-error {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.8rem;
+  color: #991b1b;
+}
+
+.summary-retry-btn {
+  padding: 0.2rem 0.6rem;
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.summary-retry-btn:hover { background: #fee2e2; }
+
+/* ── Groups ───────────────────────────────────────────────────────────── */
+
+.summary-groups {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 2rem;
+  width: 100%;
+}
+
+.summary-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.summary-group-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+/* ── Chips ────────────────────────────────────────────────────────────── */
+
+.summary-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.summary-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.15rem 0.55rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.status-new        { background: #dbeafe; color: #1e40af; }
+.status-inprogress { background: #fef9c3; color: #92400e; }
+.status-waiting    { background: #ede9fe; color: #5b21b6; }
+.status-completed  { background: #dcfce7; color: #166534; }
+
+.priority-low    { background: #f0fdf4; color: #166534; }
+.priority-medium { background: #fef3c7; color: #92400e; }
+.priority-high   { background: #fee2e2; color: #991b1b; }
+
+.chip-count {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 600px) {
+  .summary-groups { gap: 0.75rem 1rem; }
+}
