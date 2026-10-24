@@ -26,8 +26,14 @@ builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// TimeProvider.System is the real clock; Singleton because it has no state.
+// Injected into RequestStatusService so UpdatedAt is always sourced from one place
+// and can be replaced with a fake in tests.
+builder.Services.AddSingleton(TimeProvider.System);
+
 // Application services — Scoped matches DbContext lifetime (one per HTTP request)
 builder.Services.AddScoped<IRequestQueryService, RequestQueryService>();
+builder.Services.AddScoped<IRequestStatusService, RequestStatusService>();
 
 // EF Core — SQL Server, scoped lifetime (default for DbContext)
 builder.Services.AddDbContext<AppDbContext>(opts =>

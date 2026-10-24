@@ -6,7 +6,9 @@ namespace RequestsManagement.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public sealed class RequestsController(IRequestQueryService queryService) : ControllerBase
+public sealed class RequestsController(
+    IRequestQueryService queryService,
+    IRequestStatusService statusService) : ControllerBase
 {
     // GET /api/requests?page=1&pageSize=20
     //
@@ -35,5 +37,50 @@ public sealed class RequestsController(IRequestQueryService queryService) : Cont
     {
         var result = await queryService.GetSummaryAsync(ct);
         return Ok(result);
+    }
+
+    // PATCH /api/requests/{id}/status
+    //
+    // Body: { newStatus, rowVersion (Base64), changedBy }
+    // 200 — update applied; body contains new RowVersion for subsequent updates.
+    // 400 — invalid body or forbidden transition (ProblemDetails).
+    // 404 — request not found.
+    // 409 — another user updated the row after the client read it (ProblemDetails
+    //       includes currentStatus and currentRowVersion for UI refresh).
+    [HttpPatch("{id:int}/status")]
+    [ProducesResponseType(typeof(UpdateStatusResultDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> PatchStatusAsync(
+        int id,
+        [FromBody] UpdateStatusDto dto,
+        CancellationToken ct)
+    {
+        var result = await statusService.UpdateStatusAsync(id, dto, ct);
+
+        return result switch
+        {
+            StatusUpdateResult.Success s       => Ok(s.Dto),
+            StatusUpdateResult.NotFound        => NotFound(),
+            StatusUpdateResult.InvalidTransition t => Problem(
+                statusCode: StatusCodes.Status400BadRequest,
+                title: "Invalid Status Transition",
+                detail: t.Message),
+            StatusUpdateResult.Conflict c      => StatusCode(
+                StatusCodes.Status409Conflict,
+                new ProblemDetails
+                {
+                    Status = StatusCodes.Status409Conflict,
+                    Title = "Concurrency Conflict",
+                    Detail = "The request was modified by another user. Refresh and try again.",
+                    Extensions =
+                    {
+                        ["currentStatus"]     = (object?)c.CurrentStatus.ToString(),
+                        ["currentRowVersion"] = (object?)c.CurrentRowVersion,
+                    },
+                }),
+            _ => StatusCode(StatusCodes.Status500InternalServerError),
+        };
     }
 }

@@ -299,7 +299,7 @@ RequestsManagement/                (GitHub repo)
 | T-203 | RequestsController: GET list | E2 | 0.25 | P1 | T-202 | 2 | Done |
 | T-204 | Aggregations endpoint | E2 | 0.25 | P1 | T-202 | 2 | Done |
 | T-301 | StatusTransitionPolicy | E3 Update & Audit | 0.25 | P1 | T-102 | 2 | Done  |
-| T-302 | עדכון סטטוס בודד: Concurrency ו-Audit | E3 | 0.75 | P1 | T-301, T-304 | 3 | To Do |
+| T-302 | עדכון סטטוס בודד: Concurrency ו-Audit | E3 | 0.75 | P1 | T-301, T-304 | 3 | Done  |
 | T-303 | History endpoint | E3 | 0.25 | P1 | T-302 | 3 | To Do |
 | T-401 | Bulk status update (Partial Success) | E4 Bulk | 0.75 | P1 | T-302 | 3 | To Do |
 | T-501 | Cache ל-Summary: Expiration ו-Invalidation | E5 Cache | 0.5 | P1 | T-204, T-302, T-401 | 3 | To Do |
@@ -389,11 +389,13 @@ RequestsManagement/                (GitHub repo)
 #### T-301 — StatusTransitionPolicy · 0.25ש' · P1
 - **תיאור:** מחלקה סטטית עם טבלת המעברים המותרים מ-§1.13 ופונקציה `CanTransition(from, to)`.
 - **AC:** מכוסה ב-Unit Tests (T-602).
+- **אימות (24.10):** קובץ `Domain/StatusTransitionPolicy.cs` נוצר עם `switch` exhaustive על `from`. מעברים מותרים: `New→InProgress/Waiting`, `InProgress→Waiting/Completed`, `Waiting→InProgress/Completed`. `Completed` טרמינלי. מעבר לאותו סטטוס אסור. נבדק כחלק מאימות T-302.
 
 #### T-302 — עדכון סטטוס בודד · 0.75ש' · P1
 - **תיאור:** `PATCH /api/requests/{id}/status`. Service: טעינה → 404 אם לא קיים → בדיקת מעבר (400) → `Entry.Property(RowVersion).OriginalValue = dto.RowVersion` → עדכון Status ו-`UpdatedAt = TimeProvider.GetUtcNow()` → הוספת `RequestStatusHistory` → `SaveChangesAsync` אחד → במקרה של `DbUpdateConcurrencyException` מוחזר 409 עם הסטטוס וה-rowVersion הנוכחיים. Log ברמת Information על הצלחה ו-Warning על Conflict, בלי Payload מלא.
 - **תוצר:** Endpoint ו-Service.
 - **AC:** תשובת 200 מכילה rowVersion חדש ו-UpdatedAt מעודכן; עדכון עם rowVersion ישן מחזיר 409 ולא משנה כלום ב-DB; כל הצלחה יוצרת בדיוק שורת Audit אחת, באותה טרנזקציה.
+- **אימות (24.10):** RequestId 93710. (1) `New→InProgress` עם rowVersion תקין: HTTP 200, rowVersion השתנה, updatedAt עודכן. (2) `InProgress→New` (אסור): HTTP 400, `"detail": "Transition from 'InProgress' to 'New' is not allowed."`. (3) `InProgress→Completed` עם rowVersion ישן: HTTP 409, `currentStatus=InProgress`, `currentRowVersion` תקין. (4) Id לא קיים (999999999): HTTP 404. אימות DB: `SELECT * FROM RequestStatusHistory WHERE RequestId=93710` — שורה אחת בדיוק, `PreviousStatus=0`, `NewStatus=1`, `ChangedBy=tester-01`, timestamp תואם. ללא רשומה אחרי 409 (rollback אוטומטי).
 
 #### T-303 — History endpoint · 0.25ש' · P1
 - **תיאור:** `GET /api/requests/{id}/history`, ממוין ChangedAt DESC; 404 אם הפנייה לא קיימת.
