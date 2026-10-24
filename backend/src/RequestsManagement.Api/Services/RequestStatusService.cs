@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using RequestsManagement.Api.Data;
 using RequestsManagement.Api.Domain;
 using RequestsManagement.Api.Dtos;
@@ -104,5 +105,120 @@ public sealed class RequestStatusService(
             request.Status,
             Convert.ToBase64String(request.RowVersion),
             request.UpdatedAt));
+    }
+
+    public async Task<BulkStatusUpdateResultDto> BulkUpdateStatusAsync(
+        BulkStatusUpdateDto dto,
+        CancellationToken ct = default)
+    {
+        var newStatus = dto.NewStatus!.Value;
+        var now = timeProvider.GetUtcNow().UtcDateTime;
+
+        // ── 1. Load all requested entities in a single round-trip ────────────
+        // Tracked (no AsNoTracking) — we need EF to generate UPDATE statements.
+        var ids = dto.Items.Select(i => i.Id).ToList();
+        var requestsById = await db.Requests
+            .Where(r => ids.Contains(r.Id))
+            .ToDictionaryAsync(r => r.Id, ct);
+
+        var results = new List<BulkItemResultDto>(dto.Items.Count);
+        int succeeded = 0;
+
+        // ── 2. Process each item individually ─────────────────────────────────
+        // One SaveChangesAsync per item so that a concurrency failure on item N
+        // does not prevent items N+1…100 from being saved (Partial Success).
+        // Each SaveChanges wraps UPDATE Requests + INSERT RequestStatusHistory
+        // in a single implicit transaction — atomicity per item is preserved.
+        foreach (var item in dto.Items)
+        {
+            // ── Not found ─────────────────────────────────────────────────────
+            if (!requestsById.TryGetValue(item.Id, out var request))
+            {
+                results.Add(new BulkItemResultDto(
+                    item.Id, BulkItemOutcome.NotFound, null, "Request not found."));
+                continue;
+            }
+
+            // ── Parse client RowVersion ───────────────────────────────────────
+            // DTO validation (BulkStatusUpdateDto.Validate) already guarantees valid
+            // Base64 with exactly 8 bytes, so no try/catch needed here.
+            byte[] clientRowVersion = Convert.FromBase64String(item.RowVersion);
+
+            // ── Validate transition ───────────────────────────────────────────
+            if (!StatusTransitionPolicy.CanTransition(request.Status, newStatus))
+            {
+                results.Add(new BulkItemResultDto(
+                    item.Id, BulkItemOutcome.InvalidTransition, null,
+                    $"Transition from '{request.Status}' to '{newStatus}' is not allowed."));
+                continue;
+            }
+
+            // ── Set client RowVersion as the concurrency token ────────────────
+            // Same mechanism as the single-item update: overriding OriginalValue
+            // makes EF emit WHERE RowVersion = @clientToken in the UPDATE.
+            db.Entry(request).Property(r => r.RowVersion).OriginalValue = clientRowVersion;
+
+            var previousStatus = request.Status;
+            request.Status = newStatus;
+            request.UpdatedAt = now;
+
+            // ── Queue audit record in the same DbContext ──────────────────────
+            var historyEntry = new RequestStatusHistory
+            {
+                RequestId = item.Id,
+                PreviousStatus = previousStatus,
+                NewStatus = newStatus,
+                ChangedAt = now,
+                ChangedBy = dto.ChangedBy,
+            };
+            db.RequestStatusHistory.Add(historyEntry);
+
+            // ── Save (one implicit transaction: UPDATE + INSERT) ──────────────
+            try
+            {
+                await db.SaveChangesAsync(ct);
+                succeeded++;
+                results.Add(new BulkItemResultDto(
+                    item.Id,
+                    BulkItemOutcome.Updated,
+                    Convert.ToBase64String(request.RowVersion),
+                    null));
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                // ── Bulk rule: detach BEFORE the next SaveChanges ─────────────
+                // After a concurrency failure the Request entry remains Modified
+                // and the history entry remains Added in the ChangeTracker.
+                // If we leave them there, the next iteration's SaveChanges will
+                // retry both, producing a false second failure or an orphan
+                // history row.  Detaching both prevents any accidental retry.
+                EntityEntry failedEntry = ex.Entries.Single();
+                var dbValues = await failedEntry.GetDatabaseValuesAsync(ct);
+
+                failedEntry.State = EntityState.Detached;
+                db.Entry(historyEntry).State = EntityState.Detached;
+
+                if (dbValues is null)
+                {
+                    results.Add(new BulkItemResultDto(
+                        item.Id, BulkItemOutcome.NotFound, null,
+                        "Request was deleted by another user."));
+                }
+                else
+                {
+                    results.Add(new BulkItemResultDto(
+                        item.Id,
+                        BulkItemOutcome.Conflict,
+                        Convert.ToBase64String(dbValues.GetValue<byte[]>(nameof(Request.RowVersion))),
+                        "The request was modified by another user."));
+                }
+            }
+        }
+
+        logger.LogInformation(
+            "Bulk update to {NewStatus} by {Actor}: {Succeeded} succeeded, {Failed} failed out of {Total}",
+            newStatus, dto.ChangedBy, succeeded, dto.Items.Count - succeeded, dto.Items.Count);
+
+        return new BulkStatusUpdateResultDto(succeeded, dto.Items.Count - succeeded, results);
     }
 }

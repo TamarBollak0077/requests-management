@@ -8,4 +8,8 @@ public interface IRequestStatusService
         int id,
         UpdateStatusDto dto,
         CancellationToken ct = default);
+
+    Task<BulkStatusUpdateResultDto> BulkUpdateStatusAsync(
+        BulkStatusUpdateDto dto,
+        CancellationToken ct = default);
 }

@@ -301,7 +301,7 @@ RequestsManagement/                (GitHub repo)
 | T-301 | StatusTransitionPolicy | E3 Update & Audit | 0.25 | P1 | T-102 | 2 | Done  |
 | T-302 | עדכון סטטוס בודד: Concurrency ו-Audit | E3 | 0.75 | P1 | T-301, T-304 | 3 | Done  |
 | T-303 | History endpoint | E3 | 0.25 | P1 | T-302 | 3 | Done  |
-| T-401 | Bulk status update (Partial Success) | E4 Bulk | 0.75 | P1 | T-302 | 3 | To Do |
+| T-401 | Bulk status update (Partial Success) | E4 Bulk | 0.75 | P1 | T-302 | 3 | Done  |
 | T-501 | Cache ל-Summary: Expiration ו-Invalidation | E5 Cache | 0.5 | P1 | T-204, T-302, T-401 | 3 | To Do |
 | T-601 | תשתית Integration Tests | E6 Tests | 0.5 | P1 | T-203 | 4 | In Progress |
 | T-602 | Unit tests: מעברי סטטוס ו-Validation | E6 | 0.25 | P1 | T-201, T-301 | 4 | To Do |
@@ -408,9 +408,10 @@ RequestsManagement/                (GitHub repo)
 
 ### E4 — Bulk
 
-#### T-401 — Bulk status update · 0.75ש' · P1
-- **תיאור:** `POST /api/requests/status/bulk` לפי §3.3. Validation ברמת הבקשה (400), טעינה אחת של כל הפריטים, ולכל פריט: NotFound, InvalidTransition, ניסיון שמירה, Conflict או Updated. Invalidation של ה-Cache אם לפחות פריט אחד עודכן. Log של סיכום (מספר שהצליחו ומספר שנכשלו).
+#### T-401 — Bulk status update · 0.75ש' · P1 ✓ Done
+- **תיאור:** `POST /api/requests/status/bulk` לפי §3.3. Validation ברמת הבקשה (400), טעינה אחת של כל הפריטים, ולכל פריט: NotFound, InvalidTransition, ניסיון שמירה, Conflict או Updated. Log של סיכום (מספר שהצליחו ומספר שנכשלו).
 - **AC:** שליחה של 101 פריטים מחזירה 400; תמהיל של פריט קיים, פריט לא קיים ו-rowVersion ישן מחזיר 200 עם Outcome נכון לכל פריט; Audit נוצר רק לפריטים שהצליחו.
+- **אימות (24.10):** (1) `id=0` (לא חוקי): HTTP 400. (2) `rowVersion` לא תקין Base64: HTTP 400. (3) Base64 תקין אך לא 8 בתים: HTTP 400. (4) שני פריטים תקינים (`New→InProgress`): HTTP 200, שניהם `Updated`, rowVersion חדש לכל אחד. (5) Audit נוצר בדיוק לפריטים שהצליחו — אומת ב-DB. (6) Partial Success עם `NotFound`: HTTP 200, `outcome: "NotFound"` לפריט שלא קיים, `outcome: "Updated"` לפריט הקיים. (7) Partial Success עם `InvalidTransition`: HTTP 200, `outcome: "InvalidTransition"` לפריט בסטטוס טרמינלי. (8) `rowVersion` ישן: HTTP 200, `outcome: "Conflict"` עם `rowVersion` עדכני של השרת. (9) פריט תקין אחרי Conflict: עודכן בהצלחה — מוכיח שה-ChangeTracker נוקה נכון אחרי הכשל. (10) `duplicateIds`: HTTP 400. — תרחישים שלא נבדקו ידנית: items ריק, מעל 100 פריטים, תמהיל malformed + תקין — יכוסו ב-T-605.
 
 ### E5 — Cache
 

@@ -56,6 +56,24 @@ public sealed class RequestsController(
         return Ok(history);
     }
 
+    // POST /api/requests/status/bulk
+    //
+    // Body: { newStatus, changedBy, items: [{ id, rowVersion }] }
+    // 400 — body validation fails (empty/oversized items, duplicate IDs, invalid status).
+    // 200 — always returned for valid requests; per-item outcomes in results[].
+    //       Partial failures (NotFound, Conflict, InvalidTransition) are embedded in
+    //       the response body, not represented as HTTP error codes.
+    [HttpPost("status/bulk")]
+    [ProducesResponseType(typeof(BulkStatusUpdateResultDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<BulkStatusUpdateResultDto>> BulkUpdateStatusAsync(
+        [FromBody] BulkStatusUpdateDto dto,
+        CancellationToken ct)
+    {
+        var result = await statusService.BulkUpdateStatusAsync(dto, ct);
+        return Ok(result);
+    }
+
     // PATCH /api/requests/{id}/status
     //
     // Body: { newStatus, rowVersion (Base64), changedBy }
