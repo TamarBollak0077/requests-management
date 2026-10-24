@@ -4,6 +4,19 @@ export type RequestPriority = 'Low' | 'Medium' | 'High';
 export interface StatusCount { status: RequestStatus; count: number; }
 export interface PriorityCount { priority: RequestPriority; count: number; }
 export interface RequestSummary { byStatus: StatusCount[]; byPriority: PriorityCount[]; }
+
+export interface UpdateStatusRequest {
+  newStatus: RequestStatus;
+  rowVersion: string; // Base64 — value from the last GET response
+  changedBy: string;
+}
+
+export interface UpdateStatusResult {
+  id: number;
+  status: RequestStatus;
+  rowVersion: string; // Base64 — new server-generated value; must be used for subsequent updates
+  updatedAt: string;
+}
 export type SortBy = 'createdAt' | 'priority' | 'title';
 export type SortDirection = 'asc' | 'desc';
 

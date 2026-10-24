@@ -1,10 +1,14 @@
-import { Component, inject } from '@angular/core';
+import { Component, DestroyRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { BehaviorSubject, Subject, switchMap, catchError, of, startWith, map, debounceTime, distinctUntilChanged } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
+import { BehaviorSubject, Subject, switchMap, catchError, of, startWith, map, debounceTime } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RequestsApiService } from '../../core/services/requests-api.service';
-import { PagedResult, RequestListItem, RequestQueryParams, RequestStatus, RequestPriority, SortBy, SortDirection } from '../../core/models/request.model';
+import {
+  PagedResult, RequestListItem, RequestQueryParams,
+  RequestStatus, RequestPriority, SortBy, SortDirection,
+} from '../../core/models/request.model';
 import { SummaryPanelComponent } from './summary-panel/summary-panel.component';
 
 type LoadState =
@@ -13,8 +17,6 @@ type LoadState =
   | { kind: 'empty' }
   | { kind: 'error'; message: string };
 
-// All filter/sort fields as a plain object — separate from pagination.
-// This is the "form state"; params$ is the derived "query state".
 interface FilterState {
   status: RequestStatus | '';
   priority: RequestPriority | '';
@@ -25,6 +27,16 @@ interface FilterState {
   search: string;
   sortBy: SortBy;
   sortDirection: SortDirection;
+}
+
+interface RowUiState {
+  updating: boolean;
+  error: string | null;
+}
+
+interface RowPatch {
+  status: RequestStatus;
+  rowVersion: string;
 }
 
 const DEFAULT_FILTERS: FilterState = {
@@ -39,6 +51,14 @@ const DEFAULT_FILTERS: FilterState = {
   sortDirection: 'desc',
 };
 
+// Mirrors backend StatusTransitionPolicy — kept in sync manually.
+const ALLOWED_TRANSITIONS: Record<RequestStatus, RequestStatus[]> = {
+  New:        ['InProgress', 'Waiting'],
+  InProgress: ['Waiting',    'Completed'],
+  Waiting:    ['InProgress', 'Completed'],
+  Completed:  [],
+};
+
 @Component({
   selector: 'app-requests-page',
   standalone: true,
@@ -48,21 +68,19 @@ const DEFAULT_FILTERS: FilterState = {
 })
 export class RequestsPageComponent {
   private readonly api = inject(RequestsApiService);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly pageSize = 20;
 
   /**
-   * Emit here after a successful status update (T-704) to refresh the summary panel.
-   * The panel subscribes to this via its refreshTrigger$ input.
+   * Emit here after a successful status update to refresh the summary panel.
+   * T-703 wires this into <app-summary-panel [refreshTrigger$]="summaryRefresh$">.
    */
   readonly summaryRefresh$ = new Subject<void>();
 
   // ── Filter form state ────────────────────────────────────────────────
-  // Mutable object bound via [(ngModel)].  Not directly in params$ so
-  // text fields can debounce before the HTTP call fires.
   filters: FilterState = { ...DEFAULT_FILTERS };
 
-  // Exposed for the template select/option lists
   readonly statuses: RequestStatus[] = ['New', 'InProgress', 'Waiting', 'Completed'];
   readonly priorities: RequestPriority[] = ['Low', 'Medium', 'High'];
   readonly sortFields: { value: SortBy; label: string }[] = [
@@ -71,16 +89,21 @@ export class RequestsPageComponent {
     { value: 'title', label: 'Title' },
   ];
 
+  // ── Row-level optimistic update state ───────────────────────────────
+  // Keyed by request id.  Plain objects (not Map) for Angular CD compatibility.
+
+  /** Successful-update overrides for status/rowVersion pending the next page reload. */
+  rowPatches: Record<number, RowPatch> = {};
+
+  /** Per-row UI state: spinner and error message. */
+  rowState: Record<number, RowUiState> = {};
+
   // ── RxJS pipeline ────────────────────────────────────────────────────
 
-  // params$ is the single source of truth for what's being fetched.
-  // Every push here triggers a new (cancellable) HTTP call via switchMap.
   private readonly params$ = new BehaviorSubject<RequestQueryParams>(
     this.buildParams(1)
   );
 
-  // Text-input changes go through this Subject first, then debounce 300 ms
-  // before being forwarded to params$.  Non-text changes bypass this.
   private readonly textChange$ = new Subject<void>();
 
   readonly state$ = this.params$.pipe(
@@ -104,28 +127,22 @@ export class RequestsPageComponent {
   );
 
   constructor() {
-    // Debounce text-field changes then push to params$.
-    // takeUntilDestroyed() — called in injection context (constructor) —
-    // auto-injects DestroyRef and unsubscribes when the component is destroyed.
     this.textChange$
-      .pipe(
-        debounceTime(300),
-        takeUntilDestroyed()
-      )
+      .pipe(debounceTime(300), takeUntilDestroyed())
       .subscribe(() => this.params$.next(this.buildParams(1)));
+
+    // Clear per-row overrides whenever a new page query fires so fresh
+    // server data always wins after a filter/sort/pagination change.
+    this.params$.pipe(takeUntilDestroyed()).subscribe(() => {
+      this.rowPatches = {};
+      this.rowState = {};
+    });
   }
 
-  // ── Template event handlers ──────────────────────────────────────────
+  // ── Filter event handlers ────────────────────────────────────────────
 
-  /** Called by (ngModelChange) on free-text inputs; deferred via debounce. */
-  onTextChange(): void {
-    this.textChange$.next();
-  }
-
-  /** Called by (change) on select and date inputs; fires immediately. */
-  onImmediateChange(): void {
-    this.params$.next(this.buildParams(1));
-  }
+  onTextChange(): void { this.textChange$.next(); }
+  onImmediateChange(): void { this.params$.next(this.buildParams(1)); }
 
   toggleSortDirection(): void {
     this.filters.sortDirection = this.filters.sortDirection === 'desc' ? 'asc' : 'desc';
@@ -137,20 +154,83 @@ export class RequestsPageComponent {
     this.params$.next(this.buildParams(1));
   }
 
-  retry(): void {
-    this.params$.next({ ...this.params$.value });
+  retry(): void { this.params$.next({ ...this.params$.value }); }
+
+  goToPage(page: number): void { this.params$.next(this.buildParams(page)); }
+
+  // ── Status update ────────────────────────────────────────────────────
+
+  /** Effective status for a row: patched value if available, else the server value. */
+  getEffectiveStatus(req: RequestListItem): RequestStatus {
+    return this.rowPatches[req.id]?.status ?? req.status;
   }
 
-  goToPage(page: number): void {
-    // Page changes keep current filters and sort — only reset page.
-    this.params$.next(this.buildParams(page));
+  /** Effective rowVersion for a row: patched value if available, else the server value. */
+  getEffectiveRowVersion(req: RequestListItem): string {
+    return this.rowPatches[req.id]?.rowVersion ?? req.rowVersion;
+  }
+
+  /** Per-row UI state; returns a safe default when no entry exists. */
+  getRowState(id: number): RowUiState {
+    return this.rowState[id] ?? { updating: false, error: null };
+  }
+
+  /** Valid next statuses for a given current status. */
+  allowedTransitions(status: RequestStatus): RequestStatus[] {
+    return ALLOWED_TRANSITIONS[status] ?? [];
+  }
+
+  /**
+   * Called when the user picks a new status from a row's select.
+   * Sends PATCH /api/requests/{id}/status and handles 200 / 400 / 409.
+   */
+  onStatusChange(req: RequestListItem, newStatus: RequestStatus): void {
+    const id = req.id;
+    const rowVersion = this.getEffectiveRowVersion(req);
+
+    this.rowState[id] = { updating: true, error: null };
+
+    this.api.updateStatus(id, { newStatus, rowVersion, changedBy: 'user' })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (result) => {
+          this.rowPatches[id] = { status: result.status, rowVersion: result.rowVersion };
+          this.rowState[id] = { updating: false, error: null };
+          this.summaryRefresh$.next();
+        },
+        error: (err: HttpErrorResponse) => {
+          if (err.status === 409) {
+            // 409 body is ProblemDetails; currentStatus + currentRowVersion are
+            // top-level extension properties serialized by ASP.NET Core.
+            const body = err.error as {
+              currentStatus?: string;
+              currentRowVersion?: string;
+            };
+            const currentStatus = (body.currentStatus as RequestStatus | undefined)
+              ?? this.getEffectiveStatus(req);
+            const currentRowVersion = body.currentRowVersion ?? rowVersion;
+            this.rowPatches[id] = { status: currentStatus, rowVersion: currentRowVersion };
+            this.rowState[id] = {
+              updating: false,
+              error: 'הפנייה עודכנה על ידי משתמש אחר',
+            };
+          } else if (err.status === 400) {
+            const detail: string =
+              err.error?.detail ?? err.error?.title ?? 'Invalid status transition.';
+            this.rowState[id] = { updating: false, error: detail };
+          } else {
+            this.rowState[id] = {
+              updating: false,
+              error: 'Update failed. Please try again.',
+            };
+          }
+        },
+      });
   }
 
   // ── Helpers ──────────────────────────────────────────────────────────
 
-  get currentPage(): number {
-    return this.params$.value.page;
-  }
+  get currentPage(): number { return this.params$.value.page; }
 
   get activeFilterCount(): number {
     const f = this.filters;

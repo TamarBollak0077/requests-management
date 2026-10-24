@@ -180,7 +180,27 @@
               <td class="id-cell">{{ req.id }}</td>
               <td class="title-cell">{{ req.title }}</td>
               <td>{{ req.organizationName }}</td>
-              <td><span class="badge" [class]="statusClass(req.status)">{{ req.status }}</span></td>
+              <td class="status-cell">
+                <select
+                  class="status-select"
+                  [ngClass]="statusClass(getEffectiveStatus(req))"
+                  [ngModel]="getEffectiveStatus(req)"
+                  (ngModelChange)="onStatusChange(req, $event)"
+                  [disabled]="allowedTransitions(getEffectiveStatus(req)).length === 0 || getRowState(req.id).updating"
+                  [attr.aria-label]="'Change status for request ' + req.id"
+                >
+                  <option [value]="getEffectiveStatus(req)">{{ getEffectiveStatus(req) }}</option>
+                  @for (next of allowedTransitions(getEffectiveStatus(req)); track next) {
+                    <option [value]="next">→ {{ next }}</option>
+                  }
+                </select>
+                @if (getRowState(req.id).updating) {
+                  <span class="row-spinner" aria-label="Updating…"></span>
+                }
+                @if (getRowState(req.id).error) {
+                  <div class="row-error" role="alert">{{ getRowState(req.id).error }}</div>
+                }
+              </td>
               <td><span class="badge" [class]="priorityClass(req.priority)">{{ req.priority }}</span></td>
               <td>{{ req.assignedTo ?? '—' }}</td>
               <td class="date-cell">{{ formatDate(req.createdAt) }}</td>
