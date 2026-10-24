@@ -5,6 +5,14 @@ export interface StatusCount { status: RequestStatus; count: number; }
 export interface PriorityCount { priority: RequestPriority; count: number; }
 export interface RequestSummary { byStatus: StatusCount[]; byPriority: PriorityCount[]; }
 
+export interface RequestStatusHistoryItem {
+  requestId: number;
+  previousStatus: RequestStatus;
+  newStatus: RequestStatus;
+  changedAt: string; // ISO 8601 UTC string
+  changedBy: string;
+}
+
 export interface UpdateStatusRequest {
   newStatus: RequestStatus;
   rowVersion: string; // Base64 — value from the last GET response

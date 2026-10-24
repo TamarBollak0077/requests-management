@@ -312,7 +312,7 @@ RequestsManagement/                (GitHub repo)
 | T-702 | RequestsPageComponent: filters, search, sort, debounce | E7 | 1.5 | P1 | T-701 | 4 | Done |
 | T-703 | Summary panel | E7 | 0.25 | P1 | T-701, T-204 | 5 | Done |
 | T-704 | עדכון סטטוס וטיפול ב-409 ב-UI | E7 | 0.5 | P1 | T-702, T-302 | 6 | Done |
-| T-705 | תצוגת היסטוריה | E7 | 0.5 | P1 | T-702, T-303 | 6 | To Do |
+| T-705 | תצוגת היסטוריה | E7 | 0.5 | P1 | T-702, T-303 | 6 | Done |
 | T-901 | README: הרצה, גרסאות, מבנה | E9 Docs | 0.5 | P1 | כל ה-P1 | 6 | To Do |
 | T-902 | docs/decisions.md (כולל AI usage) | E9 | 0.5 | P1 | T-401, T-501, T-801 | 6 | To Do |
 | T-903 | Run-through מ-Clone נקי, Push והגשה | E9 | 0.5 | P1 | כל השאר | 6 | To Do |
@@ -460,9 +460,11 @@ RequestsManagement/                (GitHub repo)
 - **תיאור:** Select של סטטוס בשורה, ושליחה עם rowVersion. בהצלחה: עדכון השורה ורענון ה-Summary. ב-409: הודעה "הפנייה עודכנה על ידי משתמש אחר", רענון השורה מהשרת ואפשרות לנסות שוב. ב-400: הצגת הודעת השרת.
 - **AC:** תרחיש ידני: שני טאבים מעדכנים את אותה פנייה, והשני מקבל הודעת Conflict ונתונים מעודכנים.
 
-#### T-705 — תצוגת היסטוריה · 0.5ש' · P1
+#### T-705 — תצוגת היסטוריה · 0.5ש' · P1 · Done
 - **תיאור:** `RequestHistoryComponent` נפתח בלחיצה על שורה (פאנל צד או שורה נפתחת), עם Loading ו-Empty משלו.
 - **AC:** מציג Previous → New, ChangedAt ו-ChangedBy.
+- **מימוש:** כפתור History בכל שורה בטבלה פותח שורת פירוט מתחתיה עם `GET /api/requests/{id}/history`. History נטען on-demand ומגובה-Cache לכל דף. אחרי עדכון סטטוס מוצלח, ה-Cache מתבטל ו-History נטען מחדש אם הפאנל פתוח. כולל loading/empty/error states.
+- **נבדק ידנית:** HTTP 200, רשומות מוצגות נכון, Cache invalidation עובד בלי Refresh, Build ייצור עובר ללא שגיאות.
 
 #### T-706 — Bulk UI · 0.75ש' · P3
 - **AC:** בחירת עד 100 שורות, עדכון, והצגת סיכום הצלחות וכישלונות לפי פריט.

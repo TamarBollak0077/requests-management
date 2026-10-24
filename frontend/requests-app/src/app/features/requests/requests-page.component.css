@@ -284,3 +284,167 @@
   margin-left: 0.35rem;
   vertical-align: middle;
 }
+
+/* ── History toggle button ────────────────────────────────────────────── */
+
+.history-toggle-cell {
+  white-space: nowrap;
+  width: 1px;
+  padding-left: 0.25rem !important;
+}
+
+.btn-history {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.25rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: border-color 0.12s, color 0.12s, background 0.12s;
+  line-height: 1;
+}
+
+.btn-history:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: #eff6ff;
+}
+
+.btn-history:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.btn-history:active {
+  background: #dbeafe;
+}
+
+/* Expanded state — accent border + tinted background */
+.btn-history--open {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: #eff6ff;
+}
+
+.btn-history__chevron {
+  transition: transform 0.15s ease;
+}
+
+.btn-history--open .btn-history__chevron {
+  transform: rotate(180deg);
+}
+
+/* ── History detail row ───────────────────────────────────────────────── */
+
+.history-row { background: #f8fafc; }
+
+.history-cell {
+  padding: 0.75rem 1rem 0.75rem 2.5rem !important;
+  border-bottom: 2px solid var(--border);
+}
+
+/* Inner card */
+.history-inner {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  max-width: 700px;
+}
+
+/* Header row inside the card */
+.history-header {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.6rem;
+  color: var(--text-muted);
+}
+
+.history-header svg { flex-shrink: 0; }
+
+.history-header__title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text);
+}
+
+.history-header__id {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-left: 0.15rem;
+}
+
+/* Loading / empty / error line */
+.history-status {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  padding: 0.25rem 0;
+}
+
+.history-error-msg { color: #991b1b; }
+
+/* History data table */
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+.history-table th,
+.history-table td {
+  padding: 0.35rem 0.65rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.history-table tbody tr:last-child td { border-bottom: none; }
+
+.history-table th {
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  background: var(--surface-alt);
+  padding-top: 0.3rem;
+  padding-bottom: 0.3rem;
+}
+
+.history-table th:first-child { border-radius: 4px 0 0 4px; }
+.history-table th:last-child  { border-radius: 0 4px 4px 0; }
+
+/* Arrow cell between From and To */
+.history-arrow-cell {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  padding: 0.35rem 0.2rem !important;
+  width: 1.2rem;
+  text-align: center;
+}
+
+.history-changedby { color: var(--text-muted); }
+
+.history-date {
+  white-space: nowrap;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+@media (max-width: 700px) {
+  .history-cell { padding-left: 0.75rem !important; }
+  .history-inner { max-width: 100%; }
+}

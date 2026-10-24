@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { PagedResult, RequestListItem, RequestQueryParams, RequestSummary, UpdateStatusRequest, UpdateStatusResult } from '../models/request.model';
+import { PagedResult, RequestListItem, RequestQueryParams, RequestStatusHistoryItem, RequestSummary, UpdateStatusRequest, UpdateStatusResult } from '../models/request.model';
 
 @Injectable({ providedIn: 'root' })
 export class RequestsApiService {
@@ -33,5 +33,9 @@ export class RequestsApiService {
 
   updateStatus(id: number, body: UpdateStatusRequest): Observable<UpdateStatusResult> {
     return this.http.patch<UpdateStatusResult>(`/api/requests/${id}/status`, body);
+  }
+
+  getHistory(id: number): Observable<RequestStatusHistoryItem[]> {
+    return this.http.get<RequestStatusHistoryItem[]>(`/api/requests/${id}/history`);
   }
 }

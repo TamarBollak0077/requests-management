@@ -8,6 +8,7 @@ import { RequestsApiService } from '../../core/services/requests-api.service';
 import {
   PagedResult, RequestListItem, RequestQueryParams,
   RequestStatus, RequestPriority, SortBy, SortDirection,
+  RequestStatusHistoryItem,
 } from '../../core/models/request.model';
 import { SummaryPanelComponent } from './summary-panel/summary-panel.component';
 
@@ -38,6 +39,12 @@ interface RowPatch {
   status: RequestStatus;
   rowVersion: string;
 }
+
+type HistoryState =
+  | { kind: 'loading' }
+  | { kind: 'loaded'; items: RequestStatusHistoryItem[] }
+  | { kind: 'empty' }
+  | { kind: 'error' };
 
 const DEFAULT_FILTERS: FilterState = {
   status: '',
@@ -98,6 +105,12 @@ export class RequestsPageComponent {
   /** Per-row UI state: spinner and error message. */
   rowState: Record<number, RowUiState> = {};
 
+  // ── Row-level history state ──────────────────────────────────────────
+  /** Whether the history panel is expanded for a given row id. */
+  historyOpen: Record<number, boolean> = {};
+  /** Cached history fetch state per row id. */
+  historyState: Record<number, HistoryState> = {};
+
   // ── RxJS pipeline ────────────────────────────────────────────────────
 
   private readonly params$ = new BehaviorSubject<RequestQueryParams>(
@@ -136,6 +149,8 @@ export class RequestsPageComponent {
     this.params$.pipe(takeUntilDestroyed()).subscribe(() => {
       this.rowPatches = {};
       this.rowState = {};
+      this.historyOpen = {};
+      this.historyState = {};
     });
   }
 
@@ -197,6 +212,13 @@ export class RequestsPageComponent {
           this.rowPatches[id] = { status: result.status, rowVersion: result.rowVersion };
           this.rowState[id] = { updating: false, error: null };
           this.summaryRefresh$.next();
+          // Invalidate the cached history so the new audit entry is visible.
+          // If the panel is open, reload immediately; otherwise clear so the
+          // next open fetches fresh data.
+          delete this.historyState[id];
+          if (this.historyOpen[id]) {
+            this.loadHistory(id);
+          }
         },
         error: (err: HttpErrorResponse) => {
           if (err.status === 409) {
@@ -228,6 +250,48 @@ export class RequestsPageComponent {
       });
   }
 
+  // ── History ──────────────────────────────────────────────────────────
+
+  /**
+   * Toggle the history panel for a row.
+   * On first open: fetches from the API. On subsequent opens: uses cached data.
+   */
+  toggleHistory(id: number): void {
+    if (this.historyOpen[id]) {
+      this.historyOpen[id] = false;
+      return;
+    }
+    this.historyOpen[id] = true;
+    const existing = this.historyState[id];
+    if (existing?.kind === 'loaded' || existing?.kind === 'empty') return;
+    this.loadHistory(id);
+  }
+
+  loadHistory(id: number): void {
+    this.historyState[id] = { kind: 'loading' };
+    this.api.getHistory(id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (items) => {
+          this.historyState[id] = items.length === 0
+            ? { kind: 'empty' }
+            : { kind: 'loaded', items };
+        },
+        error: () => {
+          this.historyState[id] = { kind: 'error' };
+        },
+      });
+  }
+
+  getHistoryState(id: number): HistoryState {
+    return this.historyState[id] ?? { kind: 'loading' };
+  }
+
+  getHistoryItems(id: number): RequestStatusHistoryItem[] {
+    const s = this.historyState[id];
+    return s?.kind === 'loaded' ? s.items : [];
+  }
+
   // ── Helpers ──────────────────────────────────────────────────────────
 
   get currentPage(): number { return this.params$.value.page; }
@@ -254,6 +318,13 @@ export class RequestsPageComponent {
   formatDate(isoString: string): string {
     return new Date(isoString).toLocaleDateString('en-GB', {
       day: '2-digit', month: 'short', year: 'numeric',
+    });
+  }
+
+  formatDateTime(isoString: string): string {
+    return new Date(isoString).toLocaleString('en-GB', {
+      day: '2-digit', month: 'short', year: 'numeric',
+      hour: '2-digit', minute: '2-digit',
     });
   }
 
