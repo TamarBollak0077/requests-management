@@ -115,6 +115,38 @@ public sealed class RequestQueryService(AppDbContext db) : IRequestQueryService
         return new RequestSummaryDto(byStatus, byPriority);
     }
 
+    public async Task<IReadOnlyList<RequestStatusHistoryItemDto>?> GetHistoryAsync(
+        int requestId,
+        CancellationToken ct = default)
+    {
+        // Two-query approach: check existence first, then fetch history.
+        // A single history query cannot distinguish "request not found" from
+        // "request exists with no history" — both return 0 rows.
+        var requestExists = await db.Requests
+            .AsNoTracking()
+            .AnyAsync(r => r.Id == requestId, ct);
+
+        if (!requestExists)
+            return null;
+
+        // IX_RequestStatusHistory_RequestId_ChangedAt covers this query exactly:
+        // leading column = RequestId (equality), trailing column = ChangedAt DESC.
+        // Id DESC is a deterministic tiebreaker for entries inserted in the same
+        // millisecond (auto-increment preserves insertion order).
+        return await db.RequestStatusHistory
+            .AsNoTracking()
+            .Where(h => h.RequestId == requestId)
+            .OrderByDescending(h => h.ChangedAt)
+            .ThenByDescending(h => h.Id)
+            .Select(h => new RequestStatusHistoryItemDto(
+                h.RequestId,
+                h.PreviousStatus,
+                h.NewStatus,
+                h.ChangedAt,
+                h.ChangedBy))
+            .ToListAsync(ct);
+    }
+
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     /// <summary>

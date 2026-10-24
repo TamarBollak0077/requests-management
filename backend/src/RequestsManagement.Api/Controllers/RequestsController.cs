@@ -39,6 +39,23 @@ public sealed class RequestsController(
         return Ok(result);
     }
 
+    // GET /api/requests/{id}/history
+    //
+    // 200 — array of history entries, newest first.  Empty array when no history yet.
+    // 404 — request not found.
+    [HttpGet("{id:int}/history")]
+    [ProducesResponseType(typeof(IReadOnlyList<RequestStatusHistoryItemDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<IReadOnlyList<RequestStatusHistoryItemDto>>> GetHistoryAsync(
+        int id,
+        CancellationToken ct)
+    {
+        var history = await queryService.GetHistoryAsync(id, ct);
+        if (history is null)
+            return NotFound();
+        return Ok(history);
+    }
+
     // PATCH /api/requests/{id}/status
     //
     // Body: { newStatus, rowVersion (Base64), changedBy }

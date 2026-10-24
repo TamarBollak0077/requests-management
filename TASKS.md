@@ -300,7 +300,7 @@ RequestsManagement/                (GitHub repo)
 | T-204 | Aggregations endpoint | E2 | 0.25 | P1 | T-202 | 2 | Done |
 | T-301 | StatusTransitionPolicy | E3 Update & Audit | 0.25 | P1 | T-102 | 2 | Done  |
 | T-302 | עדכון סטטוס בודד: Concurrency ו-Audit | E3 | 0.75 | P1 | T-301, T-304 | 3 | Done  |
-| T-303 | History endpoint | E3 | 0.25 | P1 | T-302 | 3 | To Do |
+| T-303 | History endpoint | E3 | 0.25 | P1 | T-302 | 3 | Done  |
 | T-401 | Bulk status update (Partial Success) | E4 Bulk | 0.75 | P1 | T-302 | 3 | To Do |
 | T-501 | Cache ל-Summary: Expiration ו-Invalidation | E5 Cache | 0.5 | P1 | T-204, T-302, T-401 | 3 | To Do |
 | T-601 | תשתית Integration Tests | E6 Tests | 0.5 | P1 | T-203 | 4 | In Progress |
@@ -400,6 +400,7 @@ RequestsManagement/                (GitHub repo)
 #### T-303 — History endpoint · 0.25ש' · P1
 - **תיאור:** `GET /api/requests/{id}/history`, ממוין ChangedAt DESC; 404 אם הפנייה לא קיימת.
 - **AC:** מחזיר DTO עם 5 השדות הנדרשים (R-3.1).
+- **אימות (24.10):** (1) `GET /api/requests/93710/history` — HTTP 200, מערך עם שורה אחת: `New→InProgress`, `changedBy=tester-01`. (2) `GET /api/requests/999999999/history` — HTTP 404. (3) `GET` לפנייה קיימת ללא היסטוריה — HTTP 200 עם מערך ריק `[]`. האינדקס `IX_RequestStatusHistory_RequestId_ChangedAt` מכסה את השאילתה (Seek על RequestId, ממוין ChangedAt DESC).
 
 #### T-304 — Global error handling ו-Logging · 0.25ש' · P1
 - **תיאור:** `AddProblemDetails` ו-`IExceptionHandler` שמחזיר 500 בפורמט ProblemDetails עם traceId ובלי Stack Trace מחוץ ל-Development. `OperationCanceledException` נרשם ב-Log ברמה נמוכה ולא כשגיאה.
