@@ -97,6 +97,24 @@ public sealed class RequestQueryService(AppDbContext db) : IRequestQueryService
             items, totalCount, p.Page, p.PageSize);
     }
 
+    public async Task<RequestSummaryDto> GetSummaryAsync(CancellationToken ct = default)
+    {
+        // Two GROUP BY queries — SQL Server aggregates server-side; no rows transferred.
+        var byStatus = await db.Requests
+            .AsNoTracking()
+            .GroupBy(r => r.Status)
+            .Select(g => new StatusCountDto(g.Key, g.Count()))
+            .ToListAsync(ct);
+
+        var byPriority = await db.Requests
+            .AsNoTracking()
+            .GroupBy(r => r.Priority)
+            .Select(g => new PriorityCountDto(g.Key, g.Count()))
+            .ToListAsync(ct);
+
+        return new RequestSummaryDto(byStatus, byPriority);
+    }
+
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     /// <summary>

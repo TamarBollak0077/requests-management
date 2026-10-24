@@ -26,4 +26,14 @@ public sealed class RequestsController(IRequestQueryService queryService) : Cont
         var result = await queryService.GetPagedAsync(parameters, ct);
         return Ok(result);
     }
+
+    // Declared before any {id} route so ASP.NET Core matches "summary" literally
+    // and never interprets it as an id segment.
+    [HttpGet("summary")]
+    [ProducesResponseType(typeof(RequestSummaryDto), StatusCodes.Status200OK)]
+    public async Task<ActionResult<RequestSummaryDto>> GetSummaryAsync(CancellationToken ct)
+    {
+        var result = await queryService.GetSummaryAsync(ct);
+        return Ok(result);
+    }
 }

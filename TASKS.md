@@ -297,7 +297,7 @@ RequestsManagement/                (GitHub repo)
 | T-201 | Query DTOs, פרמטרים ו-Validation | E2 Query API | 0.5 | P1 | T-102 | 2 | Done  |
 | T-202 | RequestQueryService: filtering, search, sort | E2 | 0.75 | P1 | T-201 | 2 | Done |
 | T-203 | RequestsController: GET list | E2 | 0.25 | P1 | T-202 | 2 | Done |
-| T-204 | Aggregations endpoint | E2 | 0.25 | P1 | T-202 | 2 | In Progress |
+| T-204 | Aggregations endpoint | E2 | 0.25 | P1 | T-202 | 2 | Done |
 | T-301 | StatusTransitionPolicy | E3 Update & Audit | 0.25 | P1 | T-102 | 2 | Done  |
 | T-302 | עדכון סטטוס בודד: Concurrency ו-Audit | E3 | 0.75 | P1 | T-301, T-304 | 3 | To Do |
 | T-303 | History endpoint | E3 | 0.25 | P1 | T-302 | 3 | To Do |
@@ -379,9 +379,10 @@ RequestsManagement/                (GitHub repo)
 - **תיאור:** `GET /api/requests` ו-`GET /api/requests/{id}` (404 אם לא קיים).
 - **AC:** בדיקה ידנית ב-Swagger של שילוב פילטרים ומיון Asc/Desc.
 
-#### T-204 — Aggregations endpoint · 0.25ש' · P1
+#### T-204 — Aggregations endpoint · 0.25ש' · P1 ✓ Done
 - **תיאור:** `GET /api/requests/summary`: `GroupBy(Status).Count` ו-`GroupBy(Priority).Count` ב-DB, וסה"כ.
 - **AC:** הסכום לפי Status שווה לסה"כ; שתי שאילתות GROUP BY ב-SQL ולא חישוב בזיכרון.
+- **אימות (24.10):** HTTP 200 — ByStatus: New 25019, InProgress 25153, Waiting 24886, Completed 24942 (סה"כ 100,000); ByPriority: Low 33642, Medium 33074, High 33284 (סה"כ 100,000). שתי שאילתות GROUP BY בלבד — אפס רשומות נטענו לזיכרון.
 
 ### E3 — Status Update, Concurrency, Audit
 
