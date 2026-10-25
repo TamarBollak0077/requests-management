@@ -302,7 +302,7 @@ RequestsManagement/                (GitHub repo)
 | T-302 | עדכון סטטוס בודד: Concurrency ו-Audit | E3 | 0.75 | P1 | T-301, T-304 | 3 | Done  |
 | T-303 | History endpoint | E3 | 0.25 | P1 | T-302 | 3 | Done  |
 | T-401 | Bulk status update (Partial Success) | E4 Bulk | 0.75 | P1 | T-302 | 3 | Done  |
-| T-501 | Cache ל-Summary: Expiration ו-Invalidation | E5 Cache | 0.5 | P1 | T-204, T-302, T-401 | 3 | To Do |
+| T-501 | Cache ל-Summary: Expiration ו-Invalidation | E5 Cache | 0.5 | P1 | T-204, T-302, T-401 | 3 | Done |
 | T-601 | תשתית Integration Tests | E6 Tests | 0.5 | P1 | T-203 | 4 | In Progress |
 | T-602 | Unit tests: מעברי סטטוס ו-Validation | E6 | 0.25 | P1 | T-201, T-301 | 4 | To Do |
 | T-603 | Integration: שליפה, סינון ודפדוף | E6 | 0.25 | P1 | T-601 | 4 | To Do |
@@ -415,9 +415,11 @@ RequestsManagement/                (GitHub repo)
 
 ### E5 — Cache
 
-#### T-501 — Summary cache · 0.5ש' · P1
+#### T-501 — Summary cache · 0.5ש' · P1 ✓ Done
 - **תיאור:** `RequestSummaryService` עם `IMemoryCache.GetOrCreateAsync` ו-Absolute Expiration שנקבע ב-Configuration (ברירת מחדל 60 שניות). מתודת `Invalidate()` נקראת מ-`RequestStatusService` אחרי Commit מוצלח.
 - **AC:** קריאה שנייה לא מגיעה ל-DB (נראה ב-Log); אחרי עדכון סטטוס ה-Summary משקף את השינוי מיד.
+- **מימוש:** `IMemoryCache` רשום ב-DI; `SummaryCacheOptions` נקרא מ-`appsettings.json` (ברירת מחדל 60 שניות). `RequestQueryService.GetSummaryAsync` משתמש ב-`GetOrCreateAsync` עם Absolute Expiration. `RequestStatusService` קורא ל-`cache.Remove` אחרי כל `SaveChangesAsync` מוצלח — גם בעדכון יחיד וגם בתוך לולאת Bulk. רמות Debug-Log נוספו ל-`RequestQueryService` ו-`RequestStatusService` ב-`appsettings.Development.json`.
+- **אימות (25.10):** (1) בקשה ראשונה ל-Summary: Cache MISS + שתי שאילתות GROUP BY ב-Log. (2) בקשה שנייה מיד אחרי: Cache HIT, ללא שאילתות SQL. (3) עדכון סטטוס יחיד מוצלח: INVALIDATED ב-Log. (4) Bulk עם 2 פריטים מוצלחים: INVALIDATED פעמיים ב-Log (אחד לכל פריט). (5) Bulk כושל (InvalidTransition): ללא INVALIDATED, בקשת Summary לאחר מכן מחזירה Cache HIT — ה-Cache לא נמחק.
 
 ### E6 — Tests
 

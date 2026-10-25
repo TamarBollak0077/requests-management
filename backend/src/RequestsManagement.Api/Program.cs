@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using RequestsManagement.Api.Cache;
 using RequestsManagement.Api.Data;
 using RequestsManagement.Api.Data.Seeding;
 using RequestsManagement.Api.Infrastructure;
@@ -25,6 +26,11 @@ builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// IMemoryCache — in-process cache for the summary endpoint.
+builder.Services.AddMemoryCache();
+builder.Services.Configure<SummaryCacheOptions>(
+    builder.Configuration.GetSection(SummaryCacheOptions.SectionName));
 
 // TimeProvider.System is the real clock; Singleton because it has no state.
 // Injected into RequestStatusService so UpdatedAt is always sourced from one place

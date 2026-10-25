@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.Extensions.Caching.Memory;
+using RequestsManagement.Api.Cache;
 using RequestsManagement.Api.Data;
 using RequestsManagement.Api.Domain;
 using RequestsManagement.Api.Dtos;
@@ -9,6 +11,7 @@ namespace RequestsManagement.Api.Services;
 public sealed class RequestStatusService(
     AppDbContext db,
     TimeProvider timeProvider,
+    IMemoryCache cache,
     ILogger<RequestStatusService> logger)
     : IRequestStatusService
 {
@@ -94,6 +97,9 @@ public sealed class RequestStatusService(
                 Convert.ToBase64String(dbValues.GetValue<byte[]>(nameof(Request.RowVersion))));
         }
 
+        cache.Remove(CacheKeys.Summary);
+        logger.LogDebug("Summary cache INVALIDATED (single update, Request {Id})", id);
+
         logger.LogInformation(
             "Request {Id} status updated from {Previous} to {New} by {Actor}",
             id, previousStatus, newStatus, dto.ChangedBy);
@@ -178,6 +184,8 @@ public sealed class RequestStatusService(
             {
                 await db.SaveChangesAsync(ct);
                 succeeded++;
+                cache.Remove(CacheKeys.Summary);
+                logger.LogDebug("Summary cache INVALIDATED (bulk update, Request {Id})", item.Id);
                 results.Add(new BulkItemResultDto(
                     item.Id,
                     BulkItemOutcome.Updated,

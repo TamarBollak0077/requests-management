@@ -1,11 +1,18 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Options;
+using RequestsManagement.Api.Cache;
 using RequestsManagement.Api.Data;
 using RequestsManagement.Api.Domain;
 using RequestsManagement.Api.Dtos;
 
 namespace RequestsManagement.Api.Services;
 
-public sealed class RequestQueryService(AppDbContext db) : IRequestQueryService
+public sealed class RequestQueryService(
+    AppDbContext db,
+    IMemoryCache cache,
+    IOptions<SummaryCacheOptions> cacheOptions,
+    ILogger<RequestQueryService> logger) : IRequestQueryService
 {
     public async Task<PagedResult<RequestListItemDto>> GetPagedAsync(
         RequestQueryParameters p,
@@ -99,20 +106,36 @@ public sealed class RequestQueryService(AppDbContext db) : IRequestQueryService
 
     public async Task<RequestSummaryDto> GetSummaryAsync(CancellationToken ct = default)
     {
-        // Two GROUP BY queries — SQL Server aggregates server-side; no rows transferred.
-        var byStatus = await db.Requests
-            .AsNoTracking()
-            .GroupBy(r => r.Status)
-            .Select(g => new StatusCountDto(g.Key, g.Count()))
-            .ToListAsync(ct);
+        bool cacheMiss = false;
 
-        var byPriority = await db.Requests
-            .AsNoTracking()
-            .GroupBy(r => r.Priority)
-            .Select(g => new PriorityCountDto(g.Key, g.Count()))
-            .ToListAsync(ct);
+        var result = await cache.GetOrCreateAsync(CacheKeys.Summary, async entry =>
+        {
+            cacheMiss = true;
+            entry.SetAbsoluteExpiration(
+                TimeSpan.FromSeconds(cacheOptions.Value.AbsoluteExpirationSeconds));
 
-        return new RequestSummaryDto(byStatus, byPriority);
+            logger.LogDebug("Summary cache MISS — querying database");
+
+            // Two GROUP BY queries — SQL Server aggregates server-side; no rows transferred.
+            var byStatus = await db.Requests
+                .AsNoTracking()
+                .GroupBy(r => r.Status)
+                .Select(g => new StatusCountDto(g.Key, g.Count()))
+                .ToListAsync(ct);
+
+            var byPriority = await db.Requests
+                .AsNoTracking()
+                .GroupBy(r => r.Priority)
+                .Select(g => new PriorityCountDto(g.Key, g.Count()))
+                .ToListAsync(ct);
+
+            return new RequestSummaryDto(byStatus, byPriority);
+        });
+
+        if (!cacheMiss)
+            logger.LogDebug("Summary cache HIT");
+
+        return result!;
     }
 
     public async Task<IReadOnlyList<RequestStatusHistoryItemDto>?> GetHistoryAsync(
