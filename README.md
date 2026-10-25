@@ -227,7 +227,7 @@ RequestsManagement/
 ├── TASKS.md                           Work plan, task breakdown, traceability
 ├── docs/
 │   ├── performance.md                 Query plans, index benchmarks, bottlenecks
-│   └── decisions.md                   [planned — T-902] DB choice, Concurrency, Bulk, Cache, AI usage
+│   └── decisions.md                   DB choice, Concurrency, Bulk, Cache, AI usage
 ├── backend/
 │   ├── RequestsManagement.sln
 │   ├── src/RequestsManagement.Api/
@@ -287,4 +287,4 @@ RequestsManagement/
 
 - [docs/performance.md](docs/performance.md) — Query plans, logical reads, index benchmarks, bottlenecks
 - [TASKS.md](TASKS.md) — Full work plan with task breakdown, status, and traceability to exam requirements
-- [docs/decisions.md](docs/decisions.md) — *(planned)* DB choice, Concurrency design, Bulk strategy, Cache design, AI usage log
+- [docs/decisions.md](docs/decisions.md) — DB choice, Concurrency design, Bulk strategy, Cache design, AI usage log

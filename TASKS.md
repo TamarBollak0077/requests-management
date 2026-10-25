@@ -315,7 +315,7 @@ RequestsManagement/                (GitHub repo)
 | T-705 | תצוגת היסטוריה | E7 | 0.5 | P1 | T-702, T-303 | 6 | Done |
 | T-901 | README: הרצה, גרסאות, מבנה | E9 Docs | 0.5 | P1 | כל ה-P1 | 6 | Done |
 | T-902 | docs/decisions.md (כולל AI usage) | E9 | 0.5 | P1 | T-401, T-501, T-801 | 6 | Done |
-| T-903 | Run-through מ-Clone נקי, Push והגשה | E9 | 0.5 | P1 | כל השאר | 6 | To Do |
+| T-903 | Run-through מ-Clone נקי, Push והגשה | E9 | 0.5 | P1 | כל השאר | 6 | Done |
 | T-605 | Integration: 404, 400 ו-Bulk חלקי | E6 | 0.25 | P2 | T-601, T-401 | Reserve | To Do |
 | T-606 | Test ל-Cache Invalidation | E6 | 0.25 | P3 | T-501 | Reserve | To Do |
 | T-706 | Bulk ב-UI (Checkboxes + עדכון מרובה) | E7 | 0.75 | P3 | T-704, T-401 | Reserve | To Do |
