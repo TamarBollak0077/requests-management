@@ -130,7 +130,7 @@ Clustered Index Scan(PK_Requests)  [13,590 rows, WHERE applied as residual]
   → Top(OFFSET n, FETCH 20)
 ```
 
-**Root cause:** `IX_Requests_Status_CreatedAt` is not a covering index. The SELECT projects 9 columns (`Id, Title, OrganizationName, Status, Priority, AssignedTo, CreatedAt, UpdatedAt, RowVersion`). The nonclustered index stores only `(Status, CreatedAt, Id)`. Retrieving the remaining 6 columns would require one Key Lookup per row — 13,590 lookups. The optimizer correctly determined that a single clustered scan + sort is cheaper.
+**Root cause:** `IX_Requests_Status_CreatedAt` is not a covering index. The SELECT projects 9 columns (`Id, Title, OrganizationName, Status, Priority, AssignedTo, CreatedAt, UpdatedAt, RowVersion`). The nonclustered index stores only `(Status, CreatedAt, Id)`. The optimizer estimated that retrieving the remaining 6 columns via the nonclustered index would require up to one Key Lookup per matched row (~13,590 lookups for this filter), and determined that a single clustered scan + sort is cheaper. The plan that actually executed is the clustered scan; the Key Lookup plan was costed and rejected.
 
 Consequence: **both page 1 and page 500 produce 1,510 logical reads**, because the clustered scan always processes all 13,590 matching rows before Sort+Top apply.
 
@@ -202,7 +202,7 @@ Index Seek(IX_Requests_Status_CreatedAt_Covering_Exp)
 
 ### Why page 500 costs more than page 1
 
-OFFSET-based pagination must traverse the index from position 0 to position OFFSET before returning rows. Page 500 (OFFSET 9,980) reads 10,000 index leaf entries before emitting 20, vs. 20 for page 1. This is an inherent limitation of `OFFSET/FETCH` — logical reads scale linearly with depth (133 vs. 5). The covering index does not eliminate this, but makes the base cost 1,510× smaller per traversed page, so even deep pages are dramatically faster.
+OFFSET-based pagination must traverse the index from position 0 to position OFFSET before returning rows. Page 500 (OFFSET 9,980) reads 10,000 index leaf entries before emitting 20, vs. 20 for page 1. This is an inherent limitation of `OFFSET/FETCH` — logical reads scale with depth (133 vs. 5). The covering index does not eliminate this, but reduces per-read cost dramatically: page 1 drops from 1,510 to 5 reads (~302× improvement), and page 500 drops from 1,510 to 133 reads (~11× improvement), so even deep pages are far faster than the baseline clustered scan.
 
 ---
 
@@ -210,15 +210,17 @@ OFFSET-based pagination must traverse the index from position 0 to position OFFS
 
 | Aspect | Key-only `IX_Requests_Status_CreatedAt` | Covering variant (+INCLUDE) |
 |---|---|---|
-| Leaf row size | ~13 bytes (Status 1 + CreatedAt 8 + Id 4) | ~484 bytes (+Title 200 + OrgName 150 + Priority 1 + AssignedTo 100 + UpdatedAt 8 + RowVersion 8) |
-| Index size | ~1.2 MB | ~46 MB |
+| Leaf row size (est.) | ~13 bytes (Status 1 + CreatedAt 8 + Id 4) | ~484 bytes (+Title 200 + OrgName 150 + Priority 1 + AssignedTo 100 + UpdatedAt 8 + RowVersion 8) |
+| Index size (est.) | ~1.2 MB | ~46 MB |
 | Page 1 reads | 1,510 (clustered scan) | 5 (seek, 20 rows) |
 | Page 500 reads | 1,510 (clustered scan) | 133 (seek, 10,000 rows) |
 | COUNT reads | 79 | 79 (optimizer still uses key-only for COUNT) |
 | Write overhead | Low | Higher — every INSERT/UPDATE touching INCLUDE columns must update both index structures |
 | Sort on every query | Yes (in-memory, 13,590 rows) | No (eliminated by key order) |
 
-**Recommendation:** Make the existing index covering by adding `Id DESC` to the key and the 6 projected columns to INCLUDE, replacing the key-only index via a single `DROP_EXISTING = ON` migration. The ~45 MB storage cost and marginally higher write overhead are acceptable for a read-dominant use case at 100,000 rows. This is a straightforward EF Core migration change.
+**Recommendation:** Make the existing index covering by adding `Id DESC` to the key and the 6 projected columns to INCLUDE, replacing the key-only index via a single `DROP_EXISTING = ON` migration. The estimated ~45 MB storage cost and marginally higher write overhead are acceptable for a read-dominant use case at 100,000 rows. This is a straightforward EF Core migration change.
+
+**Important caveat:** In the covering-index experiment the optimizer chose the narrower key-only index for the COUNT query (§8 table: A-COUNT unchanged at 79 reads). If the key-only index is replaced rather than supplemented, the optimizer will have only the larger covering index available for that query. COUNT performance should be re-measured after the migration to confirm the 79-read baseline is maintained; the covering index's larger leaf rows (~484 bytes vs. ~13 bytes) could increase logical reads for that path.
 
 ---
 
@@ -230,7 +232,7 @@ OFFSET-based pagination must traverse the index from position 0 to position OFFS
 WHERE Title LIKE '%term%' OR OrganizationName LIKE '%term%'
 ```
 
-A leading wildcard prevents index use on either column — the query always performs a full clustered index scan of all 100,000 rows. This is documented as a known limitation. Full-text indexes (`CREATE FULLTEXT INDEX`) would fix it, but are outside the current scope.
+A leading wildcard prevents a standard B-tree index seek on either column — the optimizer has no sargable predicate and will typically scan the entire clustered index (all 100,000 rows in the current dataset). This is documented as a known limitation. Full-text indexes (`CREATE FULLTEXT INDEX`) would allow efficient keyword lookup and are outside the current scope.
 
 ---
 

@@ -1,5 +1,19 @@
 # Requests Management
 
+## תקציר הפרויקט
+
+מערכת Full Stack לניהול פניות ובקשות, שפותחה במסגרת מבדק מקצועי למשרת מפתח/ת תוכנה רמה ב׳.
+
+המערכת מבוססת על Angular, ASP.NET Core Web API ו-SQL Server, וכוללת 100,000 רשומות בדיקה לצורך בחינת ביצועים ועבודה עם נתונים בהיקף גדול.
+
+הפתרון כולל סינון, מיון ודפדוף בצד השרת, מנגנון Optimistic Concurrency, היסטוריית שינויים, עדכון סטטוס למספר פניות, Cache, בדיקות אוטומטיות ומדידת ביצועים.
+
+תהליך הפיתוח התבסס על חלוקה למשימות, בחינת החלטות טכנולוגיות ושימוש ב-Claude Code ככלי עזר לפיתוח, לצד סקירת קוד ובדיקת התנהגות המערכת.
+
+הוראות ההתקנה, ההרצה והתיעוד הטכני המלא מופיעים בהמשך באנגלית.
+
+---
+
 A Full Stack application for managing requests at scale. Built as a home exam for a Full Stack Developer (Level C) role.
 
 ## Technology Stack
@@ -8,7 +22,7 @@ A Full Stack application for managing requests at scale. Built as a home exam fo
 |---|---|---|
 | Backend | ASP.NET Core Web API | .NET 8 |
 | ORM | Entity Framework Core | 8.x |
-| Database | SQL Server | 2019 / 2022 (LocalDB is not supported — integration tests use `rowversion`) |
+| Database | SQL Server | 2019 / 2022 |
 | Frontend | Angular (Standalone Components) | 20.x |
 | Tests | xUnit | 2.5.3 |
 
@@ -17,7 +31,7 @@ A Full Stack application for managing requests at scale. Built as a home exam fo
 ## Prerequisites
 
 - [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8)
-- SQL Server 2019 or later (Express edition is fine; LocalDB is **not** supported because integration tests depend on `rowversion` concurrency which LocalDB does not support)
+- SQL Server 2019 or later (Express edition is fine; LocalDB was not tested and is not recommended — the project was developed and validated against a full SQL Server instance)
 - [Node.js](https://nodejs.org/) 20.19 or later (required by Angular 20)
 - [Angular CLI](https://angular.dev/tools/cli): `npm install -g @angular/cli`
 - EF Core CLI tools: `dotnet tool install --global dotnet-ef`
@@ -49,6 +63,8 @@ npm install
 cd ../..
 ```
 
+> **Working directory convention:** All commands in the sections below assume you start from the repository root (`requests-management/`). Each `cd backend` or `cd frontend/requests-app` navigates from there. Open a fresh terminal at the repo root for each section if commands are run out of order.
+
 ---
 
 ## SQL Server Connection
@@ -61,14 +77,18 @@ Server=(local);Database=RequestsManagement;Integrated Security=True;TrustServerC
 
 This is defined in `backend/src/RequestsManagement.Api/appsettings.json`.
 
-To use a different server or SQL authentication, override the connection string in `appsettings.Development.json` (create it if absent):
+To use a different server or SQL authentication, use the .NET user-secrets store so credentials are never written to a tracked file (`appsettings.Development.json` is **not** in `.gitignore` for this project):
 
-```json
-{
-  "ConnectionStrings": {
-    "DefaultConnection": "Server=YOUR_SERVER;Database=RequestsManagement;User Id=YOUR_USER;Password=YOUR_PASSWORD;TrustServerCertificate=True;"
-  }
-}
+```bash
+cd backend/src/RequestsManagement.Api
+dotnet user-secrets set "ConnectionStrings:DefaultConnection" \
+  "Server=YOUR_SERVER;Database=RequestsManagement;User Id=YOUR_USER;Password=YOUR_PASSWORD;TrustServerCertificate=True;"
+```
+
+Alternatively, set an environment variable before running the API:
+
+```powershell
+$env:ConnectionStrings__DefaultConnection = "Server=YOUR_SERVER;Database=RequestsManagement;User Id=YOUR_USER;Password=YOUR_PASSWORD;TrustServerCertificate=True;"
 ```
 
 ---
@@ -149,7 +169,7 @@ Query parameters for `GET /api/requests`:
 | `createdFrom` | date | Inclusive lower bound (YYYY-MM-DD) |
 | `createdTo` | date | Inclusive upper bound (YYYY-MM-DD) |
 | `search` | string | Contains search on Title and OrganizationName |
-| `sortBy` | string | `createdAt`, `updatedAt`, `priority`, `status`, `title`, `organizationName` |
+| `sortBy` | string | `createdAt` (default), `priority`, `title` |
 | `sortDirection` | string | `asc` (default) or `desc` |
 
 ---

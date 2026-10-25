@@ -314,7 +314,7 @@ RequestsManagement/                (GitHub repo)
 | T-704 | עדכון סטטוס וטיפול ב-409 ב-UI | E7 | 0.5 | P1 | T-702, T-302 | 6 | Done |
 | T-705 | תצוגת היסטוריה | E7 | 0.5 | P1 | T-702, T-303 | 6 | Done |
 | T-901 | README: הרצה, גרסאות, מבנה | E9 Docs | 0.5 | P1 | כל ה-P1 | 6 | Done |
-| T-902 | docs/decisions.md (כולל AI usage) | E9 | 0.5 | P1 | T-401, T-501, T-801 | 6 | To Do |
+| T-902 | docs/decisions.md (כולל AI usage) | E9 | 0.5 | P1 | T-401, T-501, T-801 | 6 | Done |
 | T-903 | Run-through מ-Clone נקי, Push והגשה | E9 | 0.5 | P1 | כל השאר | 6 | To Do |
 | T-605 | Integration: 404, 400 ו-Bulk חלקי | E6 | 0.25 | P2 | T-601, T-401 | Reserve | To Do |
 | T-606 | Test ל-Cache Invalidation | E6 | 0.25 | P3 | T-501 | Reserve | To Do |
@@ -534,8 +534,8 @@ RequestsManagement/                (GitHub repo)
 ## 6.1 Work Log -- 22.10.2026 (actual)
 
 All work below was completed on Oct 22 (day 0), ahead of the original schedule.
-Implementation was AI-assisted (Claude Sonnet 4.6); every diff was reviewed manually
-before commit.
+Implementation was AI-assisted (Claude Sonnet 4.6); the developer reviewed and understood
+most generated code and verified application behavior before each commit.
 
 ### Commits (verified from git log)
 
@@ -570,7 +570,7 @@ before commit.
 
 ### Non-coding work
 
-- Code review of every generated diff before commit.
+- Review and understanding of most generated code before commit.
 - Debugging duplicate subscription bug: traced via DevTools and RxJS pipe analysis.
 - Debugging `distinctUntilChanged` suppression: identified via manual test (search worked once then stopped).
 - AI-assisted implementation throughout; all prompts written and reviewed by developer.
