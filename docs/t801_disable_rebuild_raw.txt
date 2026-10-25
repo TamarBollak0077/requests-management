@@ -1,0 +1,83 @@
+Changed database context to 'RequestsManagement'.
+=== PRE-CHECK: index state before DISABLE ===
+IX_Requests_Status_CreatedAt 0
+=== DISABLING IX_Requests_Status_CreatedAt ===
+DISABLE succeeded.
+=== A-COUNT WITHOUT IX_Requests_Status_CreatedAt ===
+
+ SQL Server Execution Times:
+   CPU time = 0 ms,  elapsed time = 0 ms.
+--- Run 1 ---
+
+ SQL Server Execution Times:
+   CPU time = 0 ms,  elapsed time = 0 ms.
+SQL Server parse and compile time: 
+   CPU time = 0 ms, elapsed time = 11 ms.
+13590
+Table 'Requests'. Scan count 1, logical reads 1510, physical reads 46, page server reads 0, read-ahead reads 1506, page server read-ahead reads 0, lob logical reads 0, lob physical reads 0, lob page server reads 0, lob read-ahead reads 0, lob page server read-ahead reads 0.
+1 1 SELECT COUNT(*) AS FilteredCount
+    FROM [Requests] AS [r]
+    WHERE [r].[Status]    = @status
+      AND [r].[CreatedAt] >= @createdFrom
+      AND [r].[CreatedAt] <  @upperBound 1 1 0 NULL NULL NULL NULL 1.0 NULL NULL NULL 1.3499554 NULL NULL SELECT 0 NULL
+0 0   |--Compute Scalar(DEFINE:([Expr1001]=CONVERT_IMPLICIT(int,[Expr1004],0))) 1 2 1 Compute Scalar Compute Scalar DEFINE:([Expr1001]=CONVERT_IMPLICIT(int,[Expr1004],0)) [Expr1001]=CONVERT_IMPLICIT(int,[Expr1004],0) 1.0 0.0 0.0 11 1.3499554 [Expr1001] NULL PLAN_ROW 0 1.0
+1 1        |--Stream Aggregate(DEFINE:([Expr1004]=Count(*))) 1 3 2 Stream Aggregate Aggregate NULL [Expr1004]=Count(*) 1.0 0.0 6.0809008E-3 11 1.3499554 [Expr1004] NULL PLAN_ROW 0 1.0
+13590 1             |--Clustered Index Scan(OBJECT:([RequestsManagement].[dbo].[Requests].[PK_Requests] AS [r]), WHERE:([RequestsManagement].[dbo].[Requests].[Status] as [r].[Status]=[@status] AND [RequestsManagement].[dbo].[Requests].[CreatedAt] as [r].[CreatedAt]>=[@createdFrom] AND [RequestsManagement].[dbo].[Requests].[CreatedAt] as [r].[CreatedAt]<[@upperBound])) 1 4 3 Clustered Index Scan Clustered Index Scan OBJECT:([RequestsManagement].[dbo].[Requests].[PK_Requests] AS [r]), WHERE:([RequestsManagement].[dbo].[Requests].[Status] as [r].[Status]=[@status] AND [RequestsManagement].[dbo].[Requests].[CreatedAt] as [r].[CreatedAt]>=[@createdFrom] AND [RequestsManagement].[dbo].[Requests].[CreatedAt] as [r].[CreatedAt]<[@upperBound]) NULL 10134.001 1.1157176 0.110157 16 1.2258745 NULL NULL PLAN_ROW 0 1.0
+
+ SQL Server Execution Times:
+   CPU time = 32 ms,  elapsed time = 4030 ms.
+--- Run 2 ---
+
+ SQL Server Execution Times:
+   CPU time = 0 ms,  elapsed time = 0 ms.
+SQL Server parse and compile time: 
+   CPU time = 31 ms, elapsed time = 39 ms.
+13590
+Table 'Requests'. Scan count 1, logical reads 1510, physical reads 1, page server reads 0, read-ahead reads 0, page server read-ahead reads 0, lob logical reads 0, lob physical reads 0, lob page server reads 0, lob read-ahead reads 0, lob page server read-ahead reads 0.
+1 1 SELECT COUNT(*) AS FilteredCount
+    FROM [Requests] AS [r]
+    WHERE [r].[Status]    = @status
+      AND [r].[CreatedAt] >= @createdFrom
+      AND [r].[CreatedAt] <  @upperBound 2 1 0 NULL NULL NULL NULL 1.0 NULL NULL NULL 1.3499554 NULL NULL SELECT 0 NULL
+0 0   |--Compute Scalar(DEFINE:([Expr1001]=CONVERT_IMPLICIT(int,[Expr1004],0))) 2 2 1 Compute Scalar Compute Scalar DEFINE:([Expr1001]=CONVERT_IMPLICIT(int,[Expr1004],0)) [Expr1001]=CONVERT_IMPLICIT(int,[Expr1004],0) 1.0 0.0 0.0 11 1.3499554 [Expr1001] NULL PLAN_ROW 0 1.0
+1 1        |--Stream Aggregate(DEFINE:([Expr1004]=Count(*))) 2 3 2 Stream Aggregate Aggregate NULL [Expr1004]=Count(*) 1.0 0.0 6.0809008E-3 11 1.3499554 [Expr1004] NULL PLAN_ROW 0 1.0
+13590 1             |--Clustered Index Scan(OBJECT:([RequestsManagement].[dbo].[Requests].[PK_Requests] AS [r]), WHERE:([RequestsManagement].[dbo].[Requests].[Status] as [r].[Status]=[@status] AND [RequestsManagement].[dbo].[Requests].[CreatedAt] as [r].[CreatedAt]>=[@createdFrom] AND [RequestsManagement].[dbo].[Requests].[CreatedAt] as [r].[CreatedAt]<[@upperBound])) 2 4 3 Clustered Index Scan Clustered Index Scan OBJECT:([RequestsManagement].[dbo].[Requests].[PK_Requests] AS [r]), WHERE:([RequestsManagement].[dbo].[Requests].[Status] as [r].[Status]=[@status] AND [RequestsManagement].[dbo].[Requests].[CreatedAt] as [r].[CreatedAt]>=[@createdFrom] AND [RequestsManagement].[dbo].[Requests].[CreatedAt] as [r].[CreatedAt]<[@upperBound]) NULL 10134.001 1.1157176 0.110157 16 1.2258745 NULL NULL PLAN_ROW 0 1.0
+
+ SQL Server Execution Times:
+   CPU time = 15 ms,  elapsed time = 51 ms.
+--- Run 3 ---
+
+ SQL Server Execution Times:
+   CPU time = 0 ms,  elapsed time = 0 ms.
+SQL Server parse and compile time: 
+   CPU time = 6 ms, elapsed time = 6 ms.
+13590
+Table 'Requests'. Scan count 1, logical reads 1510, physical reads 0, page server reads 0, read-ahead reads 0, page server read-ahead reads 0, lob logical reads 0, lob physical reads 0, lob page server reads 0, lob read-ahead reads 0, lob page server read-ahead reads 0.
+1 1 SELECT COUNT(*) AS FilteredCount
+    FROM [Requests] AS [r]
+    WHERE [r].[Status]    = @status
+      AND [r].[CreatedAt] >= @createdFrom
+      AND [r].[CreatedAt] <  @upperBound 3 1 0 NULL NULL NULL NULL 1.0 NULL NULL NULL 1.3499554 NULL NULL SELECT 0 NULL
+0 0   |--Compute Scalar(DEFINE:([Expr1001]=CONVERT_IMPLICIT(int,[Expr1004],0))) 3 2 1 Compute Scalar Compute Scalar DEFINE:([Expr1001]=CONVERT_IMPLICIT(int,[Expr1004],0)) [Expr1001]=CONVERT_IMPLICIT(int,[Expr1004],0) 1.0 0.0 0.0 11 1.3499554 [Expr1001] NULL PLAN_ROW 0 1.0
+1 1        |--Stream Aggregate(DEFINE:([Expr1004]=Count(*))) 3 3 2 Stream Aggregate Aggregate NULL [Expr1004]=Count(*) 1.0 0.0 6.0809008E-3 11 1.3499554 [Expr1004] NULL PLAN_ROW 0 1.0
+13590 1             |--Clustered Index Scan(OBJECT:([RequestsManagement].[dbo].[Requests].[PK_Requests] AS [r]), WHERE:([RequestsManagement].[dbo].[Requests].[Status] as [r].[Status]=[@status] AND [RequestsManagement].[dbo].[Requests].[CreatedAt] as [r].[CreatedAt]>=[@createdFrom] AND [RequestsManagement].[dbo].[Requests].[CreatedAt] as [r].[CreatedAt]<[@upperBound])) 3 4 3 Clustered Index Scan Clustered Index Scan OBJECT:([RequestsManagement].[dbo].[Requests].[PK_Requests] AS [r]), WHERE:([RequestsManagement].[dbo].[Requests].[Status] as [r].[Status]=[@status] AND [RequestsManagement].[dbo].[Requests].[CreatedAt] as [r].[CreatedAt]>=[@createdFrom] AND [RequestsManagement].[dbo].[Requests].[CreatedAt] as [r].[CreatedAt]<[@upperBound]) NULL 10134.001 1.1157176 0.110157 16 1.2258745 NULL NULL PLAN_ROW 0 1.0
+
+ SQL Server Execution Times:
+   CPU time = 47 ms,  elapsed time = 54 ms.
+
+ SQL Server Execution Times:
+   CPU time = 0 ms,  elapsed time = 0 ms.
+
+ SQL Server Execution Times:
+   CPU time = 0 ms,  elapsed time = 0 ms.
+=== REBUILDING IX_Requests_Status_CreatedAt ===
+REBUILD succeeded.
+=== POST-CHECK: all Requests indexes ===
+IX_Requests_AssignedTo_CreatedAt NONCLUSTERED 0
+IX_Requests_CreatedAt NONCLUSTERED 0
+IX_Requests_OrganizationName NONCLUSTERED 0
+IX_Requests_Priority_CreatedAt NONCLUSTERED 0
+IX_Requests_Status_CreatedAt NONCLUSTERED 0
+PK_Requests CLUSTERED 0
+IX_RequestStatusHistory_RequestId_ChangedAt NONCLUSTERED 0
+PK_RequestStatusHistory CLUSTERED 0

@@ -1,0 +1,35 @@
+
+ SQL Server Execution Times:
+   CPU time = 0 ms,  elapsed time = 0 ms.
+
+ SQL Server Execution Times:
+   CPU time = 0 ms,  elapsed time = 0 ms.
+
+ SQL Server Execution Times:
+   CPU time = 0 ms,  elapsed time = 0 ms.
+
+ SQL Server Execution Times:
+   CPU time = 0 ms,  elapsed time = 0 ms.
+===== PLAN: A-COUNT =====
+
+ SQL Server Execution Times:
+   CPU time = 0 ms,  elapsed time = 0 ms.
+13590
+Table 'Requests'. Scan count 1, logical reads 79, physical reads 0, page server reads 0, read-ahead reads 0, page server read-ahead reads 0, lob logical reads 0, lob physical reads 0, lob page server reads 0, lob read-ahead reads 0, lob page server read-ahead reads 0.
+1 1 SELECT COUNT(*) AS FilteredCount
+FROM [Requests] AS [r]
+WHERE [r].[Status]    = @status
+  AND [r].[CreatedAt] >= @createdFrom
+  AND [r].[CreatedAt] <  @upperBound 1 1 0 NULL NULL NULL NULL 1.0 NULL NULL NULL 6.1991785E-2 NULL NULL SELECT 0 NULL
+0 0   |--Compute Scalar(DEFINE:([Expr1001]=CONVERT_IMPLICIT(int,[Expr1002],0))) 1 2 1 Compute Scalar Compute Scalar DEFINE:([Expr1001]=CONVERT_IMPLICIT(int,[Expr1002],0)) [Expr1001]=CONVERT_IMPLICIT(int,[Expr1002],0) 1.0 0.0 0.0 11 6.1991785E-2 [Expr1001] NULL PLAN_ROW 0 1.0
+1 1        |--Stream Aggregate(DEFINE:([Expr1002]=Count(*))) 1 3 2 Stream Aggregate Aggregate NULL [Expr1002]=Count(*) 1.0 0.0 6.0809008E-3 11 6.1991785E-2 [Expr1002] NULL PLAN_ROW 0 1.0
+13590 1             |--Index Seek(OBJECT:([RequestsManagement].[dbo].[Requests].[IX_Requests_Status_CreatedAt] AS [r]), SEEK:([r].[Status]=[@status] AND [r].[CreatedAt] < [@upperBound] AND [r].[CreatedAt] >= [@createdFrom]) ORDERED FORWARD) 1 4 3 Index Seek Index Seek OBJECT:([RequestsManagement].[dbo].[Requests].[IX_Requests_Status_CreatedAt] AS [r]), SEEK:([r].[Status]=[@status] AND [r].[CreatedAt] < [@upperBound] AND [r].[CreatedAt] >= [@createdFrom]) ORDERED FORWARD NULL 10134.001 4.4606481E-2 1.1304402E-2 9 5.5910882E-2 NULL NULL PLAN_ROW 0 1.0
+
+ SQL Server Execution Times:
+   CPU time = 15 ms,  elapsed time = 13 ms.
+
+ SQL Server Execution Times:
+   CPU time = 0 ms,  elapsed time = 0 ms.
+
+ SQL Server Execution Times:
+   CPU time = 0 ms,  elapsed time = 0 ms.

@@ -1,0 +1,85 @@
+
+ SQL Server Execution Times:
+   CPU time = 0 ms,  elapsed time = 0 ms.
+
+ SQL Server Execution Times:
+   CPU time = 0 ms,  elapsed time = 0 ms.
+
+ SQL Server Execution Times:
+   CPU time = 0 ms,  elapsed time = 0 ms.
+
+ SQL Server Execution Times:
+   CPU time = 0 ms,  elapsed time = 0 ms.
+
+ SQL Server Execution Times:
+   CPU time = 0 ms,  elapsed time = 0 ms.
+
+ SQL Server Execution Times:
+   CPU time = 0 ms,  elapsed time = 0 ms.
+===== PLAN: QUERY-B Page 500 =====
+
+ SQL Server Execution Times:
+   CPU time = 0 ms,  elapsed time = 0 ms.
+70015 Request #070015 Blue Horizon 1 2 iris 2024-09-14 20:19:16.0000000 2024-10-11 12:11:17.0000000 0x0000000000011A63
+4237 Request #004237 Bold Move 1 2 eve 2024-09-14 20:01:22.0000000 2024-10-04 23:10:22.0000000 0x000000000000186F
+32070 Request #032070 Bright Future 1 2 henry 2024-09-14 17:14:34.0000000 2024-09-20 19:21:31.0000000 0x0000000000008595
+56642 Request #056642 Nova Systems 1 1 eve 2024-09-14 16:48:56.0000000 2024-10-08 13:05:55.0000000 0x000000000000E5F1
+53689 Request #053689 Golden Path 1 0 frank 2024-09-14 16:09:03.0000000 2024-10-06 13:03:23.0000000 0x000000000000DA5D
+90889 Request #090889 Peak Solutions 1 0 NULL 2024-09-14 16:04:25.0000000 2024-09-24 15:45:30.0000000 0x0000000000016C3F
+22720 Request #022720 Bright Future 1 0 david 2024-09-14 15:20:54.0000000 2024-10-04 00:00:03.0000000 0x00000000000060EA
+15234 Request #015234 Clear View 1 2 grace 2024-09-14 13:59:06.0000000 2024-10-11 05:31:41.0000000 0x000000000000438F
+84450 Request #084450 Prime Force 1 1 jack 2024-09-14 11:33:01.0000000 2024-09-16 09:33:12.0000000 0x00000000000152FE
+57111 Request #057111 Blue Wave 1 0 david 2024-09-14 09:56:22.0000000 2024-10-04 11:08:32.0000000 0x000000000000E7C8
+35028 Request #035028 Blue Horizon 1 1 alice 2024-09-14 09:26:56.0000000 2024-10-05 07:35:54.0000000 0x000000000000912F
+9403 Request #009403 Iron Gate 1 0 NULL 2024-09-14 09:17:11.0000000 2024-10-13 10:29:59.0000000 0x0000000000002CB1
+50708 Request #050708 Silver Line 1 2 eve 2024-09-14 09:03:14.0000000 2024-10-12 03:42:03.0000000 0x000000000000CEAC
+2115 Request #002115 Golden Path 1 2 NULL 2024-09-14 08:30:56.0000000 2024-10-09 20:46:08.0000000 0x000000000000101D
+83869 Request #083869 Nova Systems 1 1 david 2024-09-14 07:59:43.0000000 2024-09-24 14:51:46.0000000 0x00000000000150B7
+85538 Request #085538 Cedar Group 1 2 jack 2024-09-14 07:57:54.0000000 2024-09-28 20:23:46.0000000 0x0000000000015743
+9727 Request #009727 Clear View 1 1 jack 2024-09-14 07:15:18.0000000 2024-09-20 03:52:36.0000000 0x0000000000002DF6
+51602 Request #051602 Silver Line 1 2 grace 2024-09-14 06:49:14.0000000 2024-09-30 01:17:22.0000000 0x000000000000D22E
+76923 Request #076923 Silver Line 1 2 carol 2024-09-14 06:14:33.0000000 2024-09-15 06:38:25.0000000 0x000000000001357A
+73878 Request #073878 Blue Wave 1 0 alice 2024-09-14 05:39:57.0000000 2024-10-11 14:10:52.0000000 0x0000000000012989
+Table 'Worktable'. Scan count 0, logical reads 0, physical reads 0, page server reads 0, read-ahead reads 0, page server read-ahead reads 0, lob logical reads 0, lob physical reads 0, lob page server reads 0, lob read-ahead reads 0, lob page server read-ahead reads 0.
+Table 'Requests'. Scan count 1, logical reads 1510, physical reads 0, page server reads 0, read-ahead reads 0, page server read-ahead reads 0, lob logical reads 0, lob physical reads 0, lob page server reads 0, lob read-ahead reads 0, lob page server read-ahead reads 0.
+20 1 SELECT [r].[Id], [r].[Title], [r].[OrganizationName], [r].[Status],
+       [r].[Priority], [r].[AssignedTo], [r].[CreatedAt], [r].[UpdatedAt], [r].[RowVersion]
+FROM [Requests] AS [r]
+WHERE [r].[Status]    = @status
+  AND [r].[CreatedAt] >= @createdFrom
+  AND [r].[CreatedAt] <  @upperBound
+ORDER BY [r].[CreatedAt] DESC, [r].[Id] DESC
+OFFSET @offset_p500 ROWS FETCH NEXT @fetch ROWS ONLY 1 1 0 NULL NULL NULL NULL 100.0 NULL NULL NULL 1.9742185 NULL NULL SELECT 0 NULL
+20 1   |--Top(OFFSET EXPRESSION:(CONVERT_IMPLICIT(bigint,[@offset_p500],0)),TOP EXPRESSION:(CONVERT_IMPLICIT(bigint,[@fetch],0))) 1 2 1 Top Top OFFSET EXPRESSION:(CONVERT_IMPLICIT(bigint,[@offset_p500],0)),TOP EXPRESSION:(CONVERT_IMPLICIT(bigint,[@fetch],0)) NULL 100.0 0.0 9.9999997E-6 496 1.9742185 [r].[Id], [r].[Title], [r].[OrganizationName], [r].[Status], [r].[Priority], [r].[AssignedTo], [r].[CreatedAt], [r].[UpdatedAt], [r].[RowVersion] NULL PLAN_ROW 0 1.0
+10000 1        |--Sort(ORDER BY:([r].[CreatedAt] DESC, [r].[Id] DESC)) 1 3 2 Sort Sort ORDER BY:([r].[CreatedAt] DESC, [r].[Id] DESC) NULL 100.0 1.1261261E-2 0.61907262 496 1.9742085 [r].[Id], [r].[Title], [r].[OrganizationName], [r].[Status], [r].[Priority], [r].[AssignedTo], [r].[CreatedAt], [r].[UpdatedAt], [r].[RowVersion] NULL PLAN_ROW 0 1.0
+13590 1             |--Clustered Index Scan(OBJECT:([RequestsManagement].[dbo].[Requests].[PK_Requests] AS [r]), WHERE:([RequestsManagement].[dbo].[Requests].[Status] as [r].[Status]=[@status] AND [RequestsManagement].[dbo].[Requests].[CreatedAt] as [r].[CreatedAt]>=[@createdFrom] AND [RequestsManagement].[dbo].[Requests].[CreatedAt] as [r].[CreatedAt]<[@upperBound])) 1 4 3 Clustered Index Scan Clustered Index Scan OBJECT:([RequestsManagement].[dbo].[Requests].[PK_Requests] AS [r]), WHERE:([RequestsManagement].[dbo].[Requests].[Status] as [r].[Status]=[@status] AND [RequestsManagement].[dbo].[Requests].[CreatedAt] as [r].[CreatedAt]>=[@createdFrom] AND [RequestsManagement].[dbo].[Requests].[CreatedAt] as [r].[CreatedAt]<[@upperBound]) [r].[Id], [r].[Title], [r].[OrganizationName], [r].[Status], [r].[Priority], [r].[AssignedTo], [r].[CreatedAt], [r].[UpdatedAt], [r].[RowVersion] 10134.001 1.1157176 0.110157 496 1.2258745 [r].[Id], [r].[Title], [r].[OrganizationName], [r].[Status], [r].[Priority], [r].[AssignedTo], [r].[CreatedAt], [r].[UpdatedAt], [r].[RowVersion] NULL PLAN_ROW 0 1.0
+
+ SQL Server Execution Times:
+   CPU time = 78 ms,  elapsed time = 88 ms.
+
+ SQL Server Execution Times:
+   CPU time = 0 ms,  elapsed time = 0 ms.
+
+ SQL Server Execution Times:
+   CPU time = 0 ms,  elapsed time = 0 ms.
+===== PLAN: QUERY-C1 Summary/Status =====
+0 25010
+1 25154
+2 24886
+3 24950
+4 1 SELECT [r].[Status], COUNT(*) AS [Count]
+FROM [Requests] AS [r]
+GROUP BY [r].[Status] 2 1 0 NULL NULL NULL NULL 4.0 NULL NULL NULL 0.58291364 NULL NULL SELECT 0 NULL
+0 0   |--Compute Scalar(DEFINE:([Expr1001]=CONVERT_IMPLICIT(int,[Expr1004],0))) 2 2 1 Compute Scalar Compute Scalar DEFINE:([Expr1001]=CONVERT_IMPLICIT(int,[Expr1004],0)) [Expr1001]=CONVERT_IMPLICIT(int,[Expr1004],0) 4.0 0.0 0.0 12 0.58291364 [r].[Status], [Expr1001] NULL PLAN_ROW 0 1.0
+4 1        |--Stream Aggregate(GROUP BY:([r].[Status]) DEFINE:([Expr1004]=Count(*))) 2 3 2 Stream Aggregate Aggregate GROUP BY:([r].[Status]) [Expr1004]=Count(*) 4.0 0.0 6.0001999E-2 12 0.58291364 [r].[Status], [Expr1004] NULL PLAN_ROW 0 1.0
+100000 1             |--Index Scan(OBJECT:([RequestsManagement].[dbo].[Requests].[IX_Requests_Status_CreatedAt] AS [r]), ORDERED FORWARD) 2 4 3 Index Scan Index Scan OBJECT:([RequestsManagement].[dbo].[Requests].[IX_Requests_Status_CreatedAt] AS [r]), ORDERED FORWARD [r].[Status] 100000.0 0.41275463 0.110157 9 0.52291161 [r].[Status] NULL PLAN_ROW 0 1.0
+===== PLAN: QUERY-C2 Summary/Priority =====
+0 33642
+1 33074
+2 33284
+3 1 SELECT [r].[Priority], COUNT(*) AS [Count]
+FROM [Requests] AS [r]
+GROUP BY [r].[Priority] 3 1 0 NULL NULL NULL NULL 3.0 NULL NULL NULL 0.57476497 NULL NULL SELECT 0 NULL
+0 0   |--Compute Scalar(DEFINE:([Expr1001]=CONVERT_IMPLICIT(int,[Expr1004],0))) 3 2 1 Compute Scalar Compute Scalar DEFINE:([Expr1001]=CONVERT_IMPLICIT(int,[Expr1004],0)) [Expr1001]=CONVERT_IMPLICIT(int,[Expr1004],0) 3.0 0.0 0.0 12 0.57476497 [r].[Priority], [Expr1001] NULL PLAN_ROW 0 1.0
+3 1        |--Stream Aggregate(GROUP BY:([r].[Priority]) DEFINE:([Expr1004]=Count(*))) 3 3 2 Stream Aggregate Aggregate GROUP BY:([r].[Priority]) [Expr1004]=Count(*) 3.0 0.0 0.0600015 12 0.57476497 [r].[Priority], [Expr1004] NULL PLAN_ROW 0 1.0
+100000 1             |--Index Scan(OBJECT:([RequestsManagement].[dbo].[Requests].[IX_Requests_Priority_CreatedAt] AS [r]), ORDERED FORWARD) 3 4 3 Index Scan Index Scan OBJECT:([RequestsManagement].[dbo].[Requests].[IX_Requests_Priority_CreatedAt] AS [r]), ORDERED FORWARD [r].[Priority] 100000.0 0.40460649 0.110157 9 0.51476347 [r].[Priority] NULL PLAN_ROW 0 1.0

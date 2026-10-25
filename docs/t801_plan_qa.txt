@@ -1,0 +1,64 @@
+
+ SQL Server Execution Times:
+   CPU time = 0 ms,  elapsed time = 0 ms.
+
+ SQL Server Execution Times:
+   CPU time = 0 ms,  elapsed time = 0 ms.
+
+ SQL Server Execution Times:
+   CPU time = 0 ms,  elapsed time = 0 ms.
+
+ SQL Server Execution Times:
+   CPU time = 0 ms,  elapsed time = 0 ms.
+
+ SQL Server Execution Times:
+   CPU time = 0 ms,  elapsed time = 0 ms.
+
+ SQL Server Execution Times:
+   CPU time = 0 ms,  elapsed time = 0 ms.
+===== PLAN: QUERY-A Page 1 =====
+
+ SQL Server Execution Times:
+   CPU time = 0 ms,  elapsed time = 0 ms.
+12320 Request #012320 Peak Solutions 1 2 henry 2025-06-30 23:45:34.0000000 2025-07-26 12:11:09.0000000 0x0000000000003822
+65726 Request #065726 Bright Future 1 2 david 2025-06-30 21:32:36.0000000 2025-07-25 00:05:33.0000000 0x0000000000010991
+31513 Request #031513 Red Rock 1 0 david 2025-06-30 21:24:20.0000000 2025-07-07 03:04:01.0000000 0x0000000000008366
+36906 Request #036906 Prime Force 1 2 frank 2025-06-30 20:25:42.0000000 2025-07-24 03:25:58.0000000 0x000000000000988C
+139 Request #000139 Cedar Group 1 1 iris 2025-06-30 18:28:22.0000000 2025-07-11 21:15:13.0000000 0x000000000000085C
+59541 Request #059541 Bold Move 1 1 frank 2025-06-30 18:06:21.0000000 2025-07-30 11:34:40.0000000 0x000000000000F150
+61093 Request #061093 Nova Systems 1 2 carol 2025-06-30 17:30:46.0000000 2025-07-29 00:08:43.0000000 0x000000000000F766
+71468 Request #071468 Golden Path 1 2 iris 2025-06-30 16:05:14.0000000 2025-07-18 07:42:37.0000000 0x0000000000012016
+29472 Request #029472 Acme Corp 1 0 grace 2025-06-30 15:09:27.0000000 2025-07-14 22:47:17.0000000 0x0000000000007B65
+48102 Request #048102 Green Valley 1 1 frank 2025-06-30 14:45:11.0000000 2025-07-09 04:24:04.0000000 0x000000000000C474
+46496 Request #046496 Cedar Group 1 2 david 2025-06-30 14:41:31.0000000 2025-07-17 02:37:34.0000000 0x000000000000BE28
+44984 Request #044984 Bright Future 1 2 eve 2025-06-30 13:55:56.0000000 2025-07-18 19:41:02.0000000 0x000000000000B83A
+67885 Request #067885 Bright Future 1 0 grace 2025-06-30 12:35:51.0000000 2025-07-18 19:38:07.0000000 0x0000000000011209
+78344 Request #078344 Prime Force 1 2 henry 2025-06-30 12:34:30.0000000 2025-07-09 19:47:36.0000000 0x0000000000013B0D
+46567 Request #046567 Blue Horizon 1 0 frank 2025-06-30 11:58:51.0000000 2025-07-24 03:49:20.0000000 0x000000000000BE6F
+79292 Request #079292 Red Rock 1 0 henry 2025-06-30 11:43:30.0000000 2025-07-29 19:49:16.0000000 0x0000000000013EC4
+72132 Request #072132 Blue Horizon 1 2 david 2025-06-30 11:31:53.0000000 2025-07-03 06:35:03.0000000 0x00000000000122B0
+22955 Request #022955 Cedar Group 1 2 alice 2025-06-30 11:23:03.0000000 2025-07-19 12:47:27.0000000 0x00000000000061D6
+72668 Request #072668 Maple Industries 1 2 carol 2025-06-30 11:22:24.0000000 2025-07-01 01:15:42.0000000 0x00000000000124CA
+84499 Request #084499 Global Tech 1 2 jack 2025-06-30 10:34:48.0000000 2025-07-01 18:55:54.0000000 0x0000000000015330
+Table 'Worktable'. Scan count 0, logical reads 0, physical reads 0, page server reads 0, read-ahead reads 0, page server read-ahead reads 0, lob logical reads 0, lob physical reads 0, lob page server reads 0, lob read-ahead reads 0, lob page server read-ahead reads 0.
+Table 'Requests'. Scan count 1, logical reads 1510, physical reads 0, page server reads 0, read-ahead reads 0, page server read-ahead reads 0, lob logical reads 0, lob physical reads 0, lob page server reads 0, lob read-ahead reads 0, lob page server read-ahead reads 0.
+20 1 SELECT [r].[Id], [r].[Title], [r].[OrganizationName], [r].[Status],
+       [r].[Priority], [r].[AssignedTo], [r].[CreatedAt], [r].[UpdatedAt], [r].[RowVersion]
+FROM [Requests] AS [r]
+WHERE [r].[Status]    = @status
+  AND [r].[CreatedAt] >= @createdFrom
+  AND [r].[CreatedAt] <  @upperBound
+ORDER BY [r].[CreatedAt] DESC, [r].[Id] DESC
+OFFSET @offset_p1 ROWS FETCH NEXT @fetch ROWS ONLY 1 1 0 NULL NULL NULL NULL 100.0 NULL NULL NULL 1.9742185 NULL NULL SELECT 0 NULL
+20 1   |--Top(OFFSET EXPRESSION:(CONVERT_IMPLICIT(bigint,[@offset_p1],0)),TOP EXPRESSION:(CONVERT_IMPLICIT(bigint,[@fetch],0))) 1 2 1 Top Top OFFSET EXPRESSION:(CONVERT_IMPLICIT(bigint,[@offset_p1],0)),TOP EXPRESSION:(CONVERT_IMPLICIT(bigint,[@fetch],0)) NULL 100.0 0.0 9.9999997E-6 496 1.9742185 [r].[Id], [r].[Title], [r].[OrganizationName], [r].[Status], [r].[Priority], [r].[AssignedTo], [r].[CreatedAt], [r].[UpdatedAt], [r].[RowVersion] NULL PLAN_ROW 0 1.0
+20 1        |--Sort(ORDER BY:([r].[CreatedAt] DESC, [r].[Id] DESC)) 1 3 2 Sort Sort ORDER BY:([r].[CreatedAt] DESC, [r].[Id] DESC) NULL 100.0 1.1261261E-2 0.61907262 496 1.9742085 [r].[Id], [r].[Title], [r].[OrganizationName], [r].[Status], [r].[Priority], [r].[AssignedTo], [r].[CreatedAt], [r].[UpdatedAt], [r].[RowVersion] NULL PLAN_ROW 0 1.0
+13590 1             |--Clustered Index Scan(OBJECT:([RequestsManagement].[dbo].[Requests].[PK_Requests] AS [r]), WHERE:([RequestsManagement].[dbo].[Requests].[Status] as [r].[Status]=[@status] AND [RequestsManagement].[dbo].[Requests].[CreatedAt] as [r].[CreatedAt]>=[@createdFrom] AND [RequestsManagement].[dbo].[Requests].[CreatedAt] as [r].[CreatedAt]<[@upperBound])) 1 4 3 Clustered Index Scan Clustered Index Scan OBJECT:([RequestsManagement].[dbo].[Requests].[PK_Requests] AS [r]), WHERE:([RequestsManagement].[dbo].[Requests].[Status] as [r].[Status]=[@status] AND [RequestsManagement].[dbo].[Requests].[CreatedAt] as [r].[CreatedAt]>=[@createdFrom] AND [RequestsManagement].[dbo].[Requests].[CreatedAt] as [r].[CreatedAt]<[@upperBound]) [r].[Id], [r].[Title], [r].[OrganizationName], [r].[Status], [r].[Priority], [r].[AssignedTo], [r].[CreatedAt], [r].[UpdatedAt], [r].[RowVersion] 10134.001 1.1157176 0.110157 496 1.2258745 [r].[Id], [r].[Title], [r].[OrganizationName], [r].[Status], [r].[Priority], [r].[AssignedTo], [r].[CreatedAt], [r].[UpdatedAt], [r].[RowVersion] NULL PLAN_ROW 0 1.0
+
+ SQL Server Execution Times:
+   CPU time = 63 ms,  elapsed time = 80 ms.
+
+ SQL Server Execution Times:
+   CPU time = 0 ms,  elapsed time = 0 ms.
+
+ SQL Server Execution Times:
+   CPU time = 0 ms,  elapsed time = 0 ms.
