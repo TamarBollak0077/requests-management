@@ -313,7 +313,7 @@ RequestsManagement/                (GitHub repo)
 | T-703 | Summary panel | E7 | 0.25 | P1 | T-701, T-204 | 5 | Done |
 | T-704 | עדכון סטטוס וטיפול ב-409 ב-UI | E7 | 0.5 | P1 | T-702, T-302 | 6 | Done |
 | T-705 | תצוגת היסטוריה | E7 | 0.5 | P1 | T-702, T-303 | 6 | Done |
-| T-901 | README: הרצה, גרסאות, מבנה | E9 Docs | 0.5 | P1 | כל ה-P1 | 6 | To Do |
+| T-901 | README: הרצה, גרסאות, מבנה | E9 Docs | 0.5 | P1 | כל ה-P1 | 6 | Done |
 | T-902 | docs/decisions.md (כולל AI usage) | E9 | 0.5 | P1 | T-401, T-501, T-801 | 6 | To Do |
 | T-903 | Run-through מ-Clone נקי, Push והגשה | E9 | 0.5 | P1 | כל השאר | 6 | To Do |
 | T-605 | Integration: 404, 400 ו-Bulk חלקי | E6 | 0.25 | P2 | T-601, T-401 | Reserve | To Do |
