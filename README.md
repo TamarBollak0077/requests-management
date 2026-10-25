@@ -14,7 +14,7 @@
 
 ---
 
-A Full Stack application for managing requests at scale. Built as a home exam for a Full Stack Developer (Level C) role.
+A Full Stack application for managing requests at scale. Built as a home exam for a Full Stack Developer (Level B) role.
 
 ## Technology Stack
 
