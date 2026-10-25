@@ -303,7 +303,7 @@ RequestsManagement/                (GitHub repo)
 | T-303 | History endpoint | E3 | 0.25 | P1 | T-302 | 3 | Done  |
 | T-401 | Bulk status update (Partial Success) | E4 Bulk | 0.75 | P1 | T-302 | 3 | Done  |
 | T-501 | Cache ל-Summary: Expiration ו-Invalidation | E5 Cache | 0.5 | P1 | T-204, T-302, T-401 | 3 | Done |
-| T-601 | תשתית Integration Tests | E6 Tests | 0.5 | P1 | T-203 | 4 | In Progress |
+| T-601 | תשתית Integration Tests | E6 Tests | 0.5 | P1 | T-203 | 4 | Done |
 | T-602 | Unit tests: מעברי סטטוס ו-Validation | E6 | 0.25 | P1 | T-201, T-301 | 4 | Done |
 | T-603 | Integration: שליפה, סינון ודפדוף | E6 | 0.25 | P1 | T-601 | 4 | To Do |
 | T-604 | Integration: Concurrency Conflict ו-Audit | E6 | 0.5 | P1 | T-601, T-302 | 4 | To Do |
