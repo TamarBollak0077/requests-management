@@ -317,7 +317,7 @@ RequestsManagement/                (GitHub repo)
 | T-902 | docs/decisions.md (כולל AI usage) | E9 | 0.5 | P1 | T-401, T-501, T-801 | 6 | Done |
 | T-903 | Run-through מ-Clone נקי, Push והגשה | E9 | 0.5 | P1 | כל השאר | 6 | Done |
 | T-605 | Integration: 404, 400 ו-Bulk חלקי | E6 | 0.25 | P2 | T-601, T-401 | Reserve | Done |
-| T-606 | Test ל-Cache Invalidation | E6 | 0.25 | P3 | T-501 | Reserve | To Do |
+| T-606 | Test ל-Cache Invalidation | E6 | 0.25 | P3 | T-501 | Reserve | Done |
 | T-706 | Bulk ב-UI (Checkboxes + עדכון מרובה) | E7 | 0.75 | P3 | T-704, T-401 | Reserve | To Do |
 | T-707 | בדיקת עשן ידנית של ה-UI | E7 | 0.25 | P2 | T-704, T-705 | Reserve | Done |
 | T-802 | הערכת Covering Index והחלטה | E8 | 0.5 | P2 | T-801 | Reserve | To Do |
@@ -445,8 +445,10 @@ RequestsManagement/                (GitHub repo)
 - **AC:** PATCH ל-Id לא קיים מחזיר 404; מעבר אסור מחזיר 400; Bulk מעורב מחזיר Outcomes נכונים.
 - **מימוש:** `StatusUpdateEdgeCaseTests.cs` — 3 בדיקות אינטגרציה. כל 43 הבדיקות עוברות.
 
-#### T-606 — Cache invalidation test · 0.25ש' · P3
+#### T-606 — Cache invalidation test · 0.25ש' · P3 · Done
 - **AC:** GET summary, אחר כך PATCH, ואחר כך GET summary מחזיר ספירות מעודכנות.
+- **מימוש:** `CacheInvalidationTests.cs` — 2 בדיקות אינטגרציה. TC-1: GET summary (populate cache) → PATCH New→InProgress → GET summary מיד: ספירת New ירדה ב-1, ספירת InProgress עלתה ב-1, הסה"כ שמור. TC-2: GET summary → PATCH אסור (Completed→InProgress, 400) → GET summary: ספירות ללא שינוי. ללא Thread.Sleep — Invalidation סינכרוני (cache.Remove אחרי Commit).
+- **אימות (27.10):** כל 45 הבדיקות עוברות (43 קיימות + 2 חדשות).
 
 ### E7 — Angular
 
