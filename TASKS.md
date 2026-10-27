@@ -319,6 +319,8 @@ RequestsManagement/                (GitHub repo)
 | T-605 | Integration: 404, 400 ו-Bulk חלקי | E6 | 0.25 | P2 | T-601, T-401 | Reserve | To Do |
 | T-606 | Test ל-Cache Invalidation | E6 | 0.25 | P3 | T-501 | Reserve | To Do |
 | T-706 | Bulk ב-UI (Checkboxes + עדכון מרובה) | E7 | 0.75 | P3 | T-704, T-401 | Reserve | To Do |
+| T-707 | בדיקת עשן ידנית של ה-UI | E7 | 0.25 | P2 | T-704, T-705 | Reserve | To Do |
+| T-802 | הערכת Covering Index והחלטה | E8 | 0.5 | P2 | T-801 | Reserve | To Do |
 
 **סיכומי זמן**
 
@@ -471,7 +473,49 @@ RequestsManagement/                (GitHub repo)
 #### T-706 — Bulk UI · 0.75ש' · P3
 - **AC:** בחירת עד 100 שורות, עדכון, והצגת סיכום הצלחות וכישלונות לפי פריט.
 
+#### T-707 — Frontend manual smoke test · 0.25ש' · P2
+- **Description:** Structured manual checklist covering every user-visible feature in the Angular UI. Produces a written pass/fail record (inline in this task or in a separate doc). Should be run on the production build (`ng build --configuration production`), not the dev server.
+- **Checklist:**
+  1. List loads with correct default sort (CreatedAt DESC)
+  2. Status filter: select each value; totalCount matches expectation
+  3. Priority filter: combined with status filter
+  4. OrganizationName filter (StartsWith): prefix match returns correct subset
+  5. AssignedTo filter: exact match
+  6. Date range (createdFrom / createdTo): inclusive bounds; records on boundary dates appear
+  7. Free-text search: debounce fires once per settled input (DevTools shows 1 request); correct results
+  8. Sort by Created Date / Priority / Title, toggle Asc/Desc: correct ordering
+  9. Pagination: multi-page navigation; page resets to 1 on filter/sort change
+  10. Empty state: filter with no results shows empty message, not spinner or crash
+  11. Loading state: visible spinner on slow connections / before data arrives
+  12. Error state: stop backend; error message and Retry button visible; Retry restores list
+  13. Status update (single row): pick valid next status; spinner visible; row updates inline without page reload
+  14. 409 Conflict: two browser tabs, update same request from both; second update shows conflict message with refreshed data
+  15. 400 Invalid transition: manual API test confirms Angular displays server error text
+  16. Summary panel: counts match; refreshes after a successful status update
+  17. Request history: History button expands panel with correct Previous → New / ChangedAt / ChangedBy rows
+  18. History empty state: newly seeded request shows empty history panel, not an error
+  19. History after status update: panel invalidates cache; new audit entry appears without page reload
+- **AC:** All 19 checklist items recorded as Pass or (with note) Known Limitation; zero unexpected crashes or blank screens.
+- **Output:** Test results in `docs/smoke-test-t707.md`.
+- **Partial results (2026-10-27):** Production build succeeded (0 errors). API-level and static code review: 9 PASS, 9 PARTIAL (implementation correct; visual interaction pending), 0 FAIL. 11 checklist items require manual browser verification — see `docs/smoke-test-t707.md` for exact instructions.
+
 ### E8 — Performance
+
+#### T-802 — Covering index evaluation and adoption decision · 0.5ש' · P2
+- **Context:** T-801 experiment (docs/performance.md §8) showed that adding INCLUDE columns to `IX_Requests_Status_CreatedAt` reduces page-1 logical reads from 1,510 to 5 (−99.7%) and page-500 reads from 1,510 to 133 (−91.2%). The experimental index was dropped after measurement. Performance.md §9 recommends permanent adoption, subject to verification of the COUNT query.
+- **Description:** Evaluate and decide whether to permanently adopt the covering index. If evidence supports it, create the migration; if not, document why and leave the key-only index in place.
+- **Steps:**
+  1. Compare current strategy (key-only `IX_Requests_Status_CreatedAt`) with the proposed covering variant `(Status ASC, CreatedAt DESC, Id DESC) INCLUDE (Title, OrganizationName, Priority, AssignedTo, UpdatedAt, RowVersion)` — see performance.md §8 for the DDL.
+  2. Re-run A-COUNT (`SELECT COUNT(*) WHERE Status=1 AND CreatedAt range`) with only the covering index available (disable the key-only index temporarily or simulate with a query hint) to confirm that the COUNT path does not degrade beyond an acceptable threshold. The key concern: covering index leaf rows are ~37× larger (~484 bytes vs. ~13 bytes); COUNT may need more I/O.
+  3. Check C1 (`GROUP BY Status`) and C2 (`GROUP BY Priority`) with the covering index — the optimizer chose the key-only index for those in the experiment (§8 table shows 0 change); confirm it still prefers the narrower existing indexes for GROUP BY after replacement.
+  4. Confirm write overhead is acceptable: the INCLUDE columns include the widest string fields (`Title` 200, `OrganizationName` 150, `AssignedTo` 100); benchmark a representative INSERT and UPDATE against the current schema.
+  5. Decision: if COUNT and GROUP BY paths are unaffected and write overhead is acceptable → create an EF Core migration using `DROP_EXISTING = ON` to replace `IX_Requests_Status_CreatedAt` in place. Otherwise → document the trade-off and leave the schema as-is.
+  6. Update docs/performance.md with the decision, final index inventory, and any new measurements.
+- **AC:**
+  - A-COUNT baseline (79 reads) is maintained or the degradation is documented with a decision rationale.
+  - Either a migration exists replacing the key-only index with the covering variant, or a documented decision explains why it was not adopted.
+  - docs/performance.md reflects the final production index state.
+- **Do not create or modify any database indexes before running the evaluation steps above.**
 
 #### T-801 — מדידת ביצועים · 0.75ש' · P1
 - **תיאור:** שתי פעולות: (1) `GET /api/requests` עם Status, טווח תאריכים ומיון CreatedAt DESC, בדף ראשון ובדף עמוק; (2) `GET /api/requests/summary`. בנוסף, אם יש זמן, חיפוש טקסט כדי להדגים את ה-Bottleneck. שיטה: לכידת ה-SQL מה-Log של EF, הרצה ב-SSMS עם Actual Execution Plan ו-`SET STATISTICS IO, TIME ON`, לפני ואחרי האינדקסים (`ALTER INDEX ... DISABLE/REBUILD`).
