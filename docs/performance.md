@@ -206,21 +206,121 @@ OFFSET-based pagination must traverse the index from position 0 to position OFFS
 
 ---
 
-## 9. Index trade-offs and recommendation
+## 9. Index trade-offs and recommendation (T-801)
 
 | Aspect | Key-only `IX_Requests_Status_CreatedAt` | Covering variant (+INCLUDE) |
 |---|---|---|
-| Leaf row size (est.) | ~13 bytes (Status 1 + CreatedAt 8 + Id 4) | ~484 bytes (+Title 200 + OrgName 150 + Priority 1 + AssignedTo 100 + UpdatedAt 8 + RowVersion 8) |
-| Index size (est.) | ~1.2 MB | ~46 MB |
+| Leaf row size (est.) | ~13 bytes (Status 1 + CreatedAt 8 + Id 4) | ~484 bytes max (actual data shorter; see §13) |
+| Index size (est.) | ~1.2 MB | ~46 MB (estimated at max column width) |
 | Page 1 reads | 1,510 (clustered scan) | 5 (seek, 20 rows) |
 | Page 500 reads | 1,510 (clustered scan) | 133 (seek, 10,000 rows) |
-| COUNT reads | 79 | 79 (optimizer still uses key-only for COUNT) |
+| COUNT reads | 79 | 79 (optimizer still uses key-only when both exist) |
 | Write overhead | Low | Higher — every INSERT/UPDATE touching INCLUDE columns must update both index structures |
 | Sort on every query | Yes (in-memory, 13,590 rows) | No (eliminated by key order) |
 
-**Recommendation:** Make the existing index covering by adding `Id DESC` to the key and the 6 projected columns to INCLUDE, replacing the key-only index via a single `DROP_EXISTING = ON` migration. The estimated ~45 MB storage cost and marginally higher write overhead are acceptable for a read-dominant use case at 100,000 rows. This is a straightforward EF Core migration change.
+**T-801 preliminary recommendation:** Make the existing index covering by adding `Id DESC` to the key and the 6 projected columns to INCLUDE. Flagged a caveat: if the key-only index is replaced (DROP_EXISTING = ON), the optimizer no longer has the narrow index for the COUNT query. T-802 was created to measure this risk before any permanent change.
 
-**Important caveat:** In the covering-index experiment the optimizer chose the narrower key-only index for the COUNT query (§8 table: A-COUNT unchanged at 79 reads). If the key-only index is replaced rather than supplemented, the optimizer will have only the larger covering index available for that query. COUNT performance should be re-measured after the migration to confirm the 79-read baseline is maintained; the covering index's larger leaf rows (~484 bytes vs. ~13 bytes) could increase logical reads for that path.
+---
+
+## 13. T-802 covering index evaluation
+
+**Objective:** Confirm what happens to A-COUNT and GROUP BY Status when the key-only index is replaced by the covering index (DROP_EXISTING = ON), vs. adding the covering index as an additional index alongside the key-only.
+
+### Test environment
+
+A disposable copy of the production data was created as `T802_Test` (100,000 rows, same distribution), measured, and dropped. The test database was not the production database; no production indexes were modified.
+
+### Actual index sizes (measured, not estimated)
+
+| Index | Actual total size | Note |
+|---|---|---|
+| Clustered PK | 11,336 KB (~11 MB) | |
+| Covering index | **10,792 KB (~10.5 MB)** | Actual data values shorter than column max-widths |
+| Key-only index | 2,152 KB (~2.1 MB) | |
+| `IX_Requests_Priority_CreatedAt` | 2,016 KB (~2 MB) | |
+
+The previously estimated ~46 MB for the covering index was based on maximum column widths. Actual storage is ~10.5 MB because nvarchar fields store only the actual string length, not the declared maximum. Adding the covering index alongside the existing indexes would increase total index storage by ~10.5 MB, not ~46 MB.
+
+### Scenario B — Covering index ONLY (simulates DROP_EXISTING = ON replacement)
+
+| Query | Reads (covering only) | Production baseline | Change |
+|---|---|---|---|
+| A-COUNT | **179** | 79 | **+127% (2.3×)** |
+| Query A page 1 | **5** | 1,510 | **−99.7%** |
+| Query B page 500 | **133** | 1,510 | **−91.2%** |
+| C1 GROUP BY Status | **1,298** | 558 | **+133% (2.3×)** |
+| C2 GROUP BY Priority | 238 | 547 | −57% (uses Priority index, unaffected) |
+
+**Finding:** Replacing the key-only index degrades A-COUNT (179 vs. 79 reads, +127%) and GROUP BY Status (1,298 vs. 558 reads, +133%). A-COUNT runs on every GET /api/requests call, so this regression occurs on the most common API path.
+
+**Root cause:** With only the covering index available, the optimizer uses it for A-COUNT and GROUP BY Status. Its leaf rows are ~5× larger than the key-only rows (because INCLUDE columns are stored at the leaf). More pages must be read to scan the same number of rows.
+
+### Scenario C — Both indexes (covering + key-only)
+
+| Query | Reads (both indexes) | Index chosen by optimizer |
+|---|---|---|
+| A-COUNT | **35** | Key-only (narrow seek) |
+| Query A page 1 | **5** | Covering (seek, no Key Lookup, no Sort) |
+| Query B page 500 | **133** | Covering (seek) |
+| C1 GROUP BY Status | **239** | Key-only (narrow scan) |
+
+**Finding:** When both indexes exist, the optimizer picks the best one for each query. COUNT and GROUP BY use the narrow key-only; pagination uses the covering index. All paths benefit simultaneously.
+
+> Note: Absolute read counts in this scenario differ from the T-801 production baseline (e.g., 35 vs. 79 for A-COUNT) because the test database was freshly populated with no page fragmentation and fresh statistics. The relative comparison within the test database (179 reads covering-only vs. 35 reads both-available) is reliable; the absolute gap between Scenario B and C (5.1×) is the meaningful signal.
+
+### Write overhead (INSERT/UPDATE, 1,000 rows)
+
+| Operation | Covering only | Covering + key-only | Δ |
+|---|---|---|---|
+| INSERT 1,000 rows | 450 ms | 579 ms | +129 ms (+29%) |
+| UPDATE 1,000 rows | 74 ms | 77 ms | +3 ms (negligible) |
+
+INSERT overhead increases by ~29% when maintaining two Status-related indexes. UPDATE overhead is within noise. For a read-dominant system (GETs >> writes), this is an acceptable cost.
+
+### Decision
+
+**Recommendation: Add the covering index as a new additional index. Do NOT replace the key-only index.**
+
+| Option | A-COUNT | GROUP BY Status | Pagination page 1 | Storage added | INSERT overhead |
+|---|---|---|---|---|---|
+| A — No change | 79 reads ✓ | 558 reads ✓ | 1,510 reads ✗ | 0 | — |
+| B — Replace (DROP_EXISTING) | ~179 reads ✗ | ~1,298 reads ✗ | 5 reads ✓ | +8.4 MB net | moderate |
+| **C — Add alongside (chosen)** | **~35–79 reads ✓** | **~239–558 reads ✓** | **5 reads ✓** | **+10.5 MB** | **+29% per INSERT** |
+
+Option C (add alongside) keeps all existing query paths efficient and adds pagination efficiency. The +10.5 MB storage and +29% INSERT overhead are acceptable at 100,000 rows for a read-dominant workload.
+
+The migration must use raw DDL (`migrationBuilder.Sql`) because EF Core 8 does not expose an `INCLUDE` clause in its index fluent API.
+
+**Approval required before creating the migration — see T-802 status.**
+
+---
+
+## 14. Final production index inventory (pending T-802 approval)
+
+### Current state (production — unchanged)
+
+| Index | Key columns | Purpose |
+|---|---|---|
+| `IX_Requests_Status_CreatedAt` | Status ASC, CreatedAt DESC | Status filter + COUNT; GROUP BY Status |
+| `IX_Requests_Priority_CreatedAt` | Priority ASC, CreatedAt DESC | Priority filter; GROUP BY Priority |
+| `IX_Requests_AssignedTo_CreatedAt` | AssignedTo ASC, CreatedAt DESC | AssignedTo filter |
+| `IX_Requests_CreatedAt` | CreatedAt DESC | Date-range-only queries |
+| `IX_Requests_OrganizationName` | OrganizationName ASC | OrganizationName prefix filter |
+
+### Proposed addition (pending approval)
+
+| Index | Key columns | INCLUDE columns |
+|---|---|---|
+| `IX_Requests_Status_CreatedAt_Covering` | Status ASC, CreatedAt DESC, Id DESC | Title, OrganizationName, Priority, AssignedTo, UpdatedAt, RowVersion |
+
+---
+
+## 15. T-802 source files
+
+| File | Description |
+|---|---|
+| `docs/t802_measure.sql` | T-802 measurement script (disposable test DB) |
+| `docs/t802_raw.txt` | T-802 raw output |
 
 ---
 

@@ -40,6 +40,20 @@ Five nonclustered indexes were added in a dedicated migration (`AddIndexes`) aft
 
 Measured impact: see [docs/performance.md](performance.md).
 
+#### T-802 covering index evaluation
+
+T-801 showed that adding INCLUDE columns to `IX_Requests_Status_CreatedAt` reduces filtered pagination reads by up to 99.7%. T-802 evaluated whether to permanently adopt this covering index.
+
+**Key finding:** Replacing the key-only index via `DROP_EXISTING = ON` degrades A-COUNT by 2.3× (79 → 179 reads) and GROUP BY Status by 2.3× (558 → 1,298 reads), because the optimizer is forced to use the larger covering index for these queries when no narrower alternative exists.
+
+**Decision (pending approval):** Add the covering index as a *new additional* index alongside the existing key-only index, not as a replacement. The optimizer then selects the best index per query: key-only for COUNT and GROUP BY, covering for filtered pagination.
+
+- Actual additional storage: **~10.5 MB** (far below the ~46 MB estimate, which assumed maximum column widths)
+- INSERT overhead: **+29%** per 1,000 rows — acceptable for a read-dominant system
+- UPDATE overhead: negligible
+
+A new EF Core migration will create `IX_Requests_Status_CreatedAt_Covering` using `migrationBuilder.Sql` (raw DDL) with INCLUDE columns. **Implementation is blocked pending explicit approval.** See [docs/performance.md §13](performance.md#13-t-802-covering-index-evaluation) for full measurements.
+
 ---
 
 ## 2. Query Efficiency
