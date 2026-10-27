@@ -102,10 +102,11 @@ cd backend
 dotnet ef database update --project src/RequestsManagement.Api
 ```
 
-This creates the `RequestsManagement` database with two migrations:
+This creates the `RequestsManagement` database with three migrations:
 
 - `InitialCreate` — `Requests` table and `RequestStatusHistory` table
 - `AddIndexes` — all performance indexes (see [docs/performance.md](docs/performance.md))
+- `AddCoveringIndex` — covering index `IX_Requests_Status_CreatedAt_Covering` with INCLUDE columns for the full list-item projection (see [docs/performance.md](docs/performance.md) §13)
 
 ---
 
@@ -170,7 +171,7 @@ Query parameters for `GET /api/requests`:
 | `createdTo` | date | Inclusive upper bound (YYYY-MM-DD) |
 | `search` | string | Contains search on Title and OrganizationName |
 | `sortBy` | string | `createdAt` (default), `priority`, `title` |
-| `sortDirection` | string | `asc` (default) or `desc` |
+| `sortDirection` | string | `desc` (default) or `asc` |
 
 ---
 
