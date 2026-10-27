@@ -320,7 +320,7 @@ RequestsManagement/                (GitHub repo)
 | T-606 | Test ל-Cache Invalidation | E6 | 0.25 | P3 | T-501 | Reserve | Done |
 | T-706 | Bulk ב-UI (Checkboxes + עדכון מרובה) | E7 | 0.75 | P3 | T-704, T-401 | Reserve | To Do |
 | T-707 | בדיקת עשן ידנית של ה-UI | E7 | 0.25 | P2 | T-704, T-705 | Reserve | Done |
-| T-802 | הערכת Covering Index והחלטה | E8 | 0.5 | P2 | T-801 | Reserve | To Do |
+| T-802 | הערכת Covering Index והחלטה | E8 | 0.5 | P2 | T-801 | Reserve | Done |
 
 **סיכומי זמן**
 

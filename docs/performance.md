@@ -289,9 +289,9 @@ INSERT overhead increases by ~29% when maintaining two Status-related indexes. U
 
 Option C (add alongside) keeps all existing query paths efficient and adds pagination efficiency. The +10.5 MB storage and +29% INSERT overhead are acceptable at 100,000 rows for a read-dominant workload.
 
-The migration must use raw DDL (`migrationBuilder.Sql`) because EF Core 8 does not expose an `INCLUDE` clause in its index fluent API.
+EF Core 8 exposes `IncludeProperties()` via `SqlServerIndexBuilderExtensions`. The migration was generated with `dotnet ef migrations add AddCoveringIndex` and uses the `SqlServer:Include` annotation, which the SQL Server migration generator translates to `INCLUDE (...)` DDL.
 
-**Approval required before creating the migration — see T-802 status.**
+**Migration implemented:** `20261027122829_AddCoveringIndex`. Approved and verified — see T-802 completion notes in TASKS.md.
 
 ---
 
@@ -307,7 +307,7 @@ The migration must use raw DDL (`migrationBuilder.Sql`) because EF Core 8 does n
 | `IX_Requests_CreatedAt` | CreatedAt DESC | Date-range-only queries |
 | `IX_Requests_OrganizationName` | OrganizationName ASC | OrganizationName prefix filter |
 
-### Proposed addition (pending approval)
+### Addition implemented (migration `20261027122829_AddCoveringIndex`)
 
 | Index | Key columns | INCLUDE columns |
 |---|---|---|

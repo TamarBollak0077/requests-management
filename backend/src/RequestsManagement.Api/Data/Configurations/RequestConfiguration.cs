@@ -87,5 +87,25 @@ public class RequestConfiguration : IEntityTypeConfiguration<Request>
         // a known bottleneck in docs/performance.md.
         builder.HasIndex(r => r.OrganizationName)
             .HasDatabaseName("IX_Requests_OrganizationName");
+
+        // Covering index for status-filtered paginated list queries.
+        // Key (Status, CreatedAt DESC, Id DESC) matches the WHERE + ORDER BY of
+        // GET /api/requests with a status filter, so the optimizer can seek
+        // directly to the matching range and emit rows in sorted order without
+        // a Sort operator.  INCLUDE columns cover the full SELECT projection,
+        // eliminating Key Lookups against the clustered index.
+        // IX_Requests_Status_CreatedAt (key-only) is kept alongside this index
+        // so the optimizer can still choose the narrow index for COUNT(*) and
+        // GROUP BY Status queries (see docs/performance.md §13).
+        builder.HasIndex(r => new { r.Status, r.CreatedAt, r.Id })
+            .HasDatabaseName("IX_Requests_Status_CreatedAt_Covering")
+            .IsDescending(false, true, true)
+            .IncludeProperties(
+                nameof(Request.Title),
+                nameof(Request.OrganizationName),
+                nameof(Request.Priority),
+                nameof(Request.AssignedTo),
+                nameof(Request.UpdatedAt),
+                nameof(Request.RowVersion));
     }
 }

@@ -83,6 +83,12 @@ namespace RequestsManagement.Api.Data.Migrations
                         .IsDescending(false, true)
                         .HasDatabaseName("IX_Requests_Status_CreatedAt");
 
+                    b.HasIndex("Status", "CreatedAt", "Id")
+                        .IsDescending(false, true, true)
+                        .HasDatabaseName("IX_Requests_Status_CreatedAt_Covering");
+
+                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("Status", "CreatedAt", "Id"), new[] { "Title", "OrganizationName", "Priority", "AssignedTo", "UpdatedAt", "RowVersion" });
+
                     b.ToTable("Requests", (string)null);
                 });
 

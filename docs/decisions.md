@@ -52,7 +52,7 @@ T-801 showed that adding INCLUDE columns to `IX_Requests_Status_CreatedAt` reduc
 - INSERT overhead: **+29%** per 1,000 rows — acceptable for a read-dominant system
 - UPDATE overhead: negligible
 
-A new EF Core migration will create `IX_Requests_Status_CreatedAt_Covering` using `migrationBuilder.Sql` (raw DDL) with INCLUDE columns. **Implementation is blocked pending explicit approval.** See [docs/performance.md §13](performance.md#13-t-802-covering-index-evaluation) for full measurements.
+Migration `20261027122829_AddCoveringIndex` creates `IX_Requests_Status_CreatedAt_Covering` using `IncludeProperties()` (EF Core 8 SQL Server extension). Verified on a disposable test database; all 45 backend tests pass. See [docs/performance.md §13](performance.md#13-t-802-covering-index-evaluation) for full measurements.
 
 ---
 
