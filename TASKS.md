@@ -316,7 +316,7 @@ RequestsManagement/                (GitHub repo)
 | T-901 | README: הרצה, גרסאות, מבנה | E9 Docs | 0.5 | P1 | כל ה-P1 | 6 | Done |
 | T-902 | docs/decisions.md (כולל AI usage) | E9 | 0.5 | P1 | T-401, T-501, T-801 | 6 | Done |
 | T-903 | Run-through מ-Clone נקי, Push והגשה | E9 | 0.5 | P1 | כל השאר | 6 | Done |
-| T-605 | Integration: 404, 400 ו-Bulk חלקי | E6 | 0.25 | P2 | T-601, T-401 | Reserve | To Do |
+| T-605 | Integration: 404, 400 ו-Bulk חלקי | E6 | 0.25 | P2 | T-601, T-401 | Reserve | Done |
 | T-606 | Test ל-Cache Invalidation | E6 | 0.25 | P3 | T-501 | Reserve | To Do |
 | T-706 | Bulk ב-UI (Checkboxes + עדכון מרובה) | E7 | 0.75 | P3 | T-704, T-401 | Reserve | To Do |
 | T-707 | בדיקת עשן ידנית של ה-UI | E7 | 0.25 | P2 | T-704, T-705 | Reserve | Done |
@@ -441,8 +441,9 @@ RequestsManagement/                (GitHub repo)
 - **תיאור:** (א) שני PATCH עם אותו rowVersion: הראשון מקבל 200 והשני 409. (ב) הרצה מקבילית עם `Task.WhenAll`: בדיוק אחד מצליח. (ג) נבדק שנוצרה שורת Audit אחת בלבד.
 - **AC:** הבדיקות עוברות באופן יציב (5 הרצות ברצף בלי Flakiness).
 
-#### T-605 — Integration: 404, 400 ו-Bulk · 0.25ש' · P2
+#### T-605 — Integration: 404, 400 ו-Bulk · 0.25ש' · P2 · Done
 - **AC:** PATCH ל-Id לא קיים מחזיר 404; מעבר אסור מחזיר 400; Bulk מעורב מחזיר Outcomes נכונים.
+- **מימוש:** `StatusUpdateEdgeCaseTests.cs` — 3 בדיקות אינטגרציה. כל 43 הבדיקות עוברות.
 
 #### T-606 — Cache invalidation test · 0.25ש' · P3
 - **AC:** GET summary, אחר כך PATCH, ואחר כך GET summary מחזיר ספירות מעודכנות.
