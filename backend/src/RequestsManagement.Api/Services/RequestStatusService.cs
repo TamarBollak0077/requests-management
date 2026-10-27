@@ -20,7 +20,6 @@ public sealed class RequestStatusService(
         UpdateStatusDto dto,
         CancellationToken ct = default)
     {
-        // ── 1. Parse client RowVersion (Base64 → byte[]) ─────────────────────
         byte[] clientRowVersion;
         try
         {
@@ -37,7 +36,6 @@ public sealed class RequestStatusService(
         if (request is null)
             return new StatusUpdateResult.NotFound();
 
-        // ── 3. Validate transition ────────────────────────────────────────────
         var newStatus = dto.NewStatus!.Value;
         if (!StatusTransitionPolicy.CanTransition(request.Status, newStatus))
             return new StatusUpdateResult.InvalidTransition(
@@ -54,12 +52,10 @@ public sealed class RequestStatusService(
         // affected and EF throws DbUpdateConcurrencyException → 409.
         db.Entry(request).Property(r => r.RowVersion).OriginalValue = clientRowVersion;
 
-        // ── 5. Apply the update ───────────────────────────────────────────────
         var previousStatus = request.Status;
         request.Status = newStatus;
         request.UpdatedAt = timeProvider.GetUtcNow().UtcDateTime;
 
-        // ── 6. Queue audit record ─────────────────────────────────────────────
         // Added to the same DbContext so it goes in the same transaction below.
         db.RequestStatusHistory.Add(new RequestStatusHistory
         {
@@ -130,14 +126,12 @@ public sealed class RequestStatusService(
         var results = new List<BulkItemResultDto>(dto.Items.Count);
         int succeeded = 0;
 
-        // ── 2. Process each item individually ─────────────────────────────────
         // One SaveChangesAsync per item so that a concurrency failure on item N
         // does not prevent items N+1…100 from being saved (Partial Success).
         // Each SaveChanges wraps UPDATE Requests + INSERT RequestStatusHistory
         // in a single implicit transaction — atomicity per item is preserved.
         foreach (var item in dto.Items)
         {
-            // ── Not found ─────────────────────────────────────────────────────
             if (!requestsById.TryGetValue(item.Id, out var request))
             {
                 results.Add(new BulkItemResultDto(
@@ -145,12 +139,10 @@ public sealed class RequestStatusService(
                 continue;
             }
 
-            // ── Parse client RowVersion ───────────────────────────────────────
             // DTO validation (BulkStatusUpdateDto.Validate) already guarantees valid
             // Base64 with exactly 8 bytes, so no try/catch needed here.
             byte[] clientRowVersion = Convert.FromBase64String(item.RowVersion);
 
-            // ── Validate transition ───────────────────────────────────────────
             if (!StatusTransitionPolicy.CanTransition(request.Status, newStatus))
             {
                 results.Add(new BulkItemResultDto(
@@ -159,7 +151,6 @@ public sealed class RequestStatusService(
                 continue;
             }
 
-            // ── Set client RowVersion as the concurrency token ────────────────
             // Same mechanism as the single-item update: overriding OriginalValue
             // makes EF emit WHERE RowVersion = @clientToken in the UPDATE.
             db.Entry(request).Property(r => r.RowVersion).OriginalValue = clientRowVersion;

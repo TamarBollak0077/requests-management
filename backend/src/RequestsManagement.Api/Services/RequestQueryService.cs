@@ -77,10 +77,8 @@ public sealed class RequestQueryService(
         // EF strips ORDER BY when translating CountAsync.
         var totalCount = await query.CountAsync(ct);
 
-        // ── Step 4: sort ──────────────────────────────────────────────────────
         var ordered = ApplySort(query, p.SortBy, p.SortDirection);
 
-        // ── Step 5: paginate and project ─────────────────────────────────────
         // Skip/Take → OFFSET n ROWS FETCH NEXT m ROWS ONLY (SQL Server).
         // Select runs inside the SQL query — only needed columns travel over the wire.
         // RowVersion (byte[]) cannot be base-64 encoded in SQL, so we fetch it raw
