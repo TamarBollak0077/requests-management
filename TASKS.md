@@ -319,7 +319,7 @@ RequestsManagement/                (GitHub repo)
 | T-605 | Integration: 404, 400 ו-Bulk חלקי | E6 | 0.25 | P2 | T-601, T-401 | Reserve | To Do |
 | T-606 | Test ל-Cache Invalidation | E6 | 0.25 | P3 | T-501 | Reserve | To Do |
 | T-706 | Bulk ב-UI (Checkboxes + עדכון מרובה) | E7 | 0.75 | P3 | T-704, T-401 | Reserve | To Do |
-| T-707 | בדיקת עשן ידנית של ה-UI | E7 | 0.25 | P2 | T-704, T-705 | Reserve | To Do |
+| T-707 | בדיקת עשן ידנית של ה-UI | E7 | 0.25 | P2 | T-704, T-705 | Reserve | Done |
 | T-802 | הערכת Covering Index והחלטה | E8 | 0.5 | P2 | T-801 | Reserve | To Do |
 
 **סיכומי זמן**
@@ -497,7 +497,7 @@ RequestsManagement/                (GitHub repo)
   19. History after status update: panel invalidates cache; new audit entry appears without page reload
 - **AC:** All 19 checklist items recorded as Pass or (with note) Known Limitation; zero unexpected crashes or blank screens.
 - **Output:** Test results in `docs/smoke-test-t707.md`.
-- **Partial results (2026-10-27):** Production build succeeded (0 errors). API-level and static code review: 9 PASS, 9 PARTIAL (implementation correct; visual interaction pending), 0 FAIL. 11 checklist items require manual browser verification — see `docs/smoke-test-t707.md` for exact instructions.
+- **Results (2026-10-27):** Production build succeeded (0 errors). All 19 test cases PASS. 9 verified by API + static code review; 10 verified by developer manual browser testing. See `docs/smoke-test-t707.md` for full results.
 
 ### E8 — Performance
 
