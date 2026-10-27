@@ -216,6 +216,8 @@ Test breakdown:
 | `StatusTransitionPolicyTests` (in UnitTest1.cs) | Unit | Allowed and forbidden status transitions |
 | `GetRequestsFilteringTests` | Integration | Filtering, sorting, pagination against a real DB |
 | `ConcurrencyTests` | Integration | Sequential 409 conflict and parallel `Task.WhenAll` conflict; exactly one audit row created |
+| `StatusUpdateEdgeCaseTests` | Integration | 404 (not found), 400 (invalid transition), and bulk partial-success outcomes |
+| `CacheInvalidationTests` | Integration | Summary cache invalidated on status update; stale value not returned after change |
 | `SmokeTests` | Integration | Basic API health |
 
 ---
@@ -281,6 +283,14 @@ RequestsManagement/
 | Cache scale-out | `IMemoryCache` is per-process. In a multi-instance deployment, invalidation in one instance does not reach others. Improvement: `IDistributedCache` (Redis). |
 | Integration tests require SQL Server | No Docker / Testcontainers. The reviewer must have SQL Server accessible. The connection string is configurable via the `TEST_CONNECTION_STRING` environment variable. |
 | Angular tests | No automated Angular tests (not required by the exam). |
+
+---
+
+## Project Planning and Tracking
+
+- **[GitHub Issues](https://github.com/TamarBollak0077/requests-management/issues)** — one issue per task; [closed issues](https://github.com/TamarBollak0077/requests-management/issues?q=is%3Aissue+is%3Aclosed) show completed work. Issue #27 ([T-706] Bulk UI) is intentionally left open as a deferred P3 enhancement.
+- **GitHub Project #1** (`Requests Management`) — Kanban board tracking issue status. The project is currently **private**; request access from the repository owner if needed.
+- **[TASKS.md](TASKS.md)** — Requirement traceability (R-x.y IDs mapped to task IDs), dependency ordering, effort estimates, and a work-log section. This is the primary planning document.
 
 ---
 

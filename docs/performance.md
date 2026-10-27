@@ -295,9 +295,9 @@ EF Core 8 exposes `IncludeProperties()` via `SqlServerIndexBuilderExtensions`. T
 
 ---
 
-## 14. Final production index inventory (pending T-802 approval)
+## 14. Final production index inventory (T-802 implemented)
 
-### Current state (production — unchanged)
+### Indexes before T-802 (migration `20261022173203_AddIndexes`)
 
 | Index | Key columns | Purpose |
 |---|---|---|

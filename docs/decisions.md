@@ -46,7 +46,7 @@ T-801 showed that adding INCLUDE columns to `IX_Requests_Status_CreatedAt` reduc
 
 **Key finding:** Replacing the key-only index via `DROP_EXISTING = ON` degrades A-COUNT by 2.3× (79 → 179 reads) and GROUP BY Status by 2.3× (558 → 1,298 reads), because the optimizer is forced to use the larger covering index for these queries when no narrower alternative exists.
 
-**Decision (pending approval):** Add the covering index as a *new additional* index alongside the existing key-only index, not as a replacement. The optimizer then selects the best index per query: key-only for COUNT and GROUP BY, covering for filtered pagination.
+**Decision:** Add the covering index as a *new additional* index alongside the existing key-only index, not as a replacement. The optimizer then selects the best index per query: key-only for COUNT and GROUP BY, covering for filtered pagination.
 
 - Actual additional storage: **~10.5 MB** (far below the ~46 MB estimate, which assumed maximum column widths)
 - INSERT overhead: **+29%** per 1,000 rows — acceptable for a read-dominant system
