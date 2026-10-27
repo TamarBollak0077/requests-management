@@ -42,10 +42,14 @@ builder.Services.AddScoped<IRequestQueryService, RequestQueryService>();
 builder.Services.AddScoped<IRequestStatusService, RequestStatusService>();
 
 // EF Core — SQL Server, scoped lifetime (default for DbContext)
+// CommandTimeout(300): the default 30 s is insufficient for CREATE INDEX on large tables
+// (e.g. AddCoveringIndex on 100,000 rows). 300 s (5 min) gives enough headroom without
+// masking runaway queries in normal operation at this scale.
 builder.Services.AddDbContext<AppDbContext>(opts =>
     opts.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection"),
-        sql => sql.EnableRetryOnFailure()));
+        sql => sql.EnableRetryOnFailure()
+                  .CommandTimeout(300)));
 
 // ── Pipeline ─────────────────────────────────────────────────────────────────
 
