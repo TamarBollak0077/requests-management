@@ -218,7 +218,7 @@ RequestsManagement/                (GitHub repo)
 
 **DI Lifetimes**: `AppDbContext` ו-Services ב-Scoped. `IMemoryCache` ו-`TimeProvider` ב-Singleton. Service שמחזיק DbContext לא נרשם כ-Singleton.
 
-**API Contract (טיוטה)**
+**API Contract**
 
 | Method | Route | תיאור | קודים |
 |---|---|---|---|
@@ -233,7 +233,7 @@ RequestsManagement/                (GitHub repo)
 
 ---
 
-## 3. החלטות טכנולוגיות (טיוטה, יורחב ב-`docs/decisions.md`)
+## 3. החלטות טכנולוגיות (סיכום — פירוט מלא ב-`docs/decisions.md`)
 
 ### 3.1 SQL Server לעומת MongoDB
 - **נבחר: SQL Server.** הנתונים מובנים וסכמתם קבועה. יש תמיכה מובנית ב-`rowversion` ל-Optimistic Concurrency. עדכון הפנייה ושורת ה-Audit נכנסים לאותה טרנזקציה. `GROUP BY` ואינדקסים מורכבים זמינים בקלות. EF Core 8 בשל, וה-SQL Server כבר מותקן בסביבה.
@@ -322,17 +322,18 @@ RequestsManagement/                (GitHub repo)
 | T-707 | בדיקת עשן ידנית של ה-UI | E7 | 0.25 | P2 | T-704, T-705 | Reserve | Done |
 | T-802 | הערכת Covering Index והחלטה | E8 | 0.5 | P2 | T-801 | Reserve | Done |
 
-**סיכומי זמן**
+**סיכומי זמן (הערכות מקוריות)**
 
-| קבוצה | שעות |
-|---|---|
-| P1 (ימים 1–6, בלי T-000) | **13.25** |
-| P2 | 0.25 |
-| P3 | 1.0 |
-| **סה"כ כל המשימות** | **14.5** |
-| תקציב | 12 (בסיס) עד 14 (מורחב) |
+| קבוצה | הערכה (ש') | סטטוס |
+|---|---|---|
+| P1 — כל 28 משימות (כולל T-000) | **13.75** | הושלמו |
+| P2 — T-605, T-707, T-802 | **1.00** | הושלמו |
+| P3 — T-606 | **0.25** | בוצע |
+| P3 — T-706 (Bulk UI) | **0.75** | נדחה — לא מומש (P3 אופציונלי) |
+| **סה"כ מתוכנן** | **15.75** | |
+| תקציב מקורי | 12 (בסיס) עד 14 (מורחב) | |
 
-> **הערכה כנה:** ליבת החובה (P1) מוערכת ב-13.25 שעות, יותר מ-12 שעות הבסיס. מעשית, צריך כ-13–14 שעות (בממוצע כ-2:15 ביום), או להפעיל את רשימת הקיצוצים ב-§7.3. אם נעבוד 12 שעות בדיוק בלי קיצוצים, לא יישאר זמן Buffer.
+> **הערה על ההערכות:** הזמן שבטבלה הוא הערכת תכנון מקורית, לא זמן בפועל. הזמן בפועל לא נרשם בצורה שיטתית. ליבת החובה (P1) הוערכה ב-13.75 שעות (כולל T-000: 0.5ש'), יותר מ-12 שעות הבסיס. כל משימות ה-P1 וה-P2 הושלמו בפועל.
 
 ---
 
@@ -511,7 +512,7 @@ RequestsManagement/                (GitHub repo)
   - COUNT and GROUP BY queries continue to prefer the narrow key-only `IX_Requests_Status_CreatedAt` (unchanged at 79 reads).
   - Paginated list queries use the new `IX_Requests_Status_CreatedAt_Covering` (eliminates Key Lookups).
   - The covering index was added as a **separate** index (migration `AddCoveringIndex`), not as a replacement (`DROP_EXISTING = ON` was not used). Both are present in the production schema.
-  - Write overhead is acceptable at this scale; INCLUDE columns are identical to the projected SELECT, so no extra maintenance overhead beyond what the query already reads.
+  - Write overhead is acceptable at this scale: measured INSERT overhead is +29% per 1,000 rows; UPDATE overhead is negligible. The covering index adds ~10.5 MB of additional index storage (actual measured, not estimated).
 - **AC:**
   - A-COUNT baseline (79 reads) is maintained ✓
   - Migration `AddCoveringIndex` creates `IX_Requests_Status_CreatedAt_Covering` alongside the existing key-only index ✓

@@ -80,9 +80,16 @@ This is defined in `backend/src/RequestsManagement.Api/appsettings.json`.
 To use a different server or SQL authentication, use the .NET user-secrets store so credentials are never written to a tracked file (`appsettings.Development.json` is **not** in `.gitignore` for this project):
 
 ```bash
+# Bash / zsh
 cd backend/src/RequestsManagement.Api
 dotnet user-secrets set "ConnectionStrings:DefaultConnection" \
   "Server=YOUR_SERVER;Database=RequestsManagement;User Id=YOUR_USER;Password=YOUR_PASSWORD;TrustServerCertificate=True;"
+```
+
+```powershell
+# PowerShell
+cd backend/src/RequestsManagement.Api
+dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Server=YOUR_SERVER;Database=RequestsManagement;User Id=YOUR_USER;Password=YOUR_PASSWORD;TrustServerCertificate=True;"
 ```
 
 Alternatively, set an environment variable before running the API:
@@ -201,7 +208,7 @@ dotnet test
 
 To override the test connection string (e.g. on a CI server or a different SQL instance):
 
-```bash
+```powershell
 $env:TEST_CONNECTION_STRING = "Server=YOUR_SERVER;Database=RequestsManagement_Tests;Integrated Security=True;TrustServerCertificate=True;"
 dotnet test
 ```
@@ -252,9 +259,9 @@ RequestsManagement/
         │   ├── models/                DTO interfaces
         │   └── services/              RequestsApiService (HttpClient only)
         └── features/requests/
-            ├── requests-page/         Container: RxJS state, debounce(300ms), switchMap
-            ├── summary-panel/         Aggregations display
-            └── (table/filters inline in requests-page)
+            ├── requests-page.component  Container: RxJS state, debounce(300ms), switchMap
+            ├── summary-panel/           Aggregations display
+            └── (filters, table, history inline in requests-page.component)
 ```
 
 ---

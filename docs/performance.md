@@ -222,6 +222,49 @@ OFFSET-based pagination must traverse the index from position 0 to position OFFS
 
 ---
 
+## 10. Known bottleneck: free-text search
+
+`GET /api/requests?search=term` translates to:
+
+```sql
+WHERE Title LIKE '%term%' OR OrganizationName LIKE '%term%'
+```
+
+A leading wildcard prevents a standard B-tree index seek on either column — the optimizer has no sargable predicate and will typically scan the entire clustered index (all 100,000 rows in the current dataset). This is documented as a known limitation. Full-text indexes (`CREATE FULLTEXT INDEX`) would allow efficient keyword lookup and are outside the current scope.
+
+---
+
+## 11. Database restoration verification
+
+All experimental changes were fully reverted after measurement:
+
+| Change | Reverted? | Verification |
+|---|---|---|
+| Covering index created (Step 3) | Yes — `DROP INDEX IF EXISTS` | Index absent from `sys.indexes` |
+| `IX_Requests_Status_CreatedAt` disabled (DISABLE/REBUILD step) | Yes — `ALTER INDEX ... REBUILD` | `is_disabled = 0` confirmed |
+
+Final index count: **8** (same as before any T-801 experiment). All `is_disabled = 0`.
+
+> _This section describes the database state at the end of the T-801 experiment. The final production state includes one additional covering index added by the `AddCoveringIndex` migration; see §14._
+
+---
+
+## 12. Source files
+
+| File | Description |
+|---|---|
+| `docs/t801_step2_measure.sql` | Baseline measurement script |
+| `docs/t801_step2_raw.txt` | Baseline raw output |
+| `docs/t801_step2_results.md` | Baseline summary |
+| `docs/t801_step3_measure.sql` | Covering-index measurement script |
+| `docs/t801_step3_raw.txt` | Covering-index raw output |
+| `docs/t801_step3_plans.txt` | Actual execution plans (Step 3) |
+| `docs/t801_step3_results.md` | Covering-index summary |
+| `docs/t801_disable_rebuild.sql` | DISABLE/REBUILD script |
+| `docs/t801_disable_rebuild_raw.txt` | DISABLE/REBUILD raw output |
+
+---
+
 ## 13. T-802 covering index evaluation
 
 **Objective:** Confirm what happens to A-COUNT and GROUP BY Status when the key-only index is replaced by the covering index (DROP_EXISTING = ON), vs. adding the covering index as an additional index alongside the key-only.
@@ -321,44 +364,3 @@ EF Core 8 exposes `IncludeProperties()` via `SqlServerIndexBuilderExtensions`. T
 |---|---|
 | `docs/t802_measure.sql` | T-802 measurement script (disposable test DB) |
 | `docs/t802_raw.txt` | T-802 raw output |
-
----
-
-## 10. Known bottleneck: free-text search
-
-`GET /api/requests?search=term` translates to:
-
-```sql
-WHERE Title LIKE '%term%' OR OrganizationName LIKE '%term%'
-```
-
-A leading wildcard prevents a standard B-tree index seek on either column — the optimizer has no sargable predicate and will typically scan the entire clustered index (all 100,000 rows in the current dataset). This is documented as a known limitation. Full-text indexes (`CREATE FULLTEXT INDEX`) would allow efficient keyword lookup and are outside the current scope.
-
----
-
-## 11. Database restoration verification
-
-All experimental changes were fully reverted after measurement:
-
-| Change | Reverted? | Verification |
-|---|---|---|
-| Covering index created (Step 3) | Yes — `DROP INDEX IF EXISTS` | Index absent from `sys.indexes` |
-| `IX_Requests_Status_CreatedAt` disabled (DISABLE/REBUILD step) | Yes — `ALTER INDEX ... REBUILD` | `is_disabled = 0` confirmed |
-
-Final index count: **8** (same as before any experiment). All `is_disabled = 0`.
-
----
-
-## 12. Source files
-
-| File | Description |
-|---|---|
-| `docs/t801_step2_measure.sql` | Baseline measurement script |
-| `docs/t801_step2_raw.txt` | Baseline raw output |
-| `docs/t801_step2_results.md` | Baseline summary |
-| `docs/t801_step3_measure.sql` | Covering-index measurement script |
-| `docs/t801_step3_raw.txt` | Covering-index raw output |
-| `docs/t801_step3_plans.txt` | Actual execution plans (Step 3) |
-| `docs/t801_step3_results.md` | Covering-index summary |
-| `docs/t801_disable_rebuild.sql` | DISABLE/REBUILD script |
-| `docs/t801_disable_rebuild_raw.txt` | DISABLE/REBUILD raw output |
