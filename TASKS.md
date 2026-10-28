@@ -256,13 +256,13 @@ RequestsManagement/                (GitHub repo)
 - **Race ידוע:** קריאה שהתחילה לפני ה-Commit עלולה לכתוב ערך ישן אחרי ה-Invalidation. ה-TTL מגביל את זמן החשיפה ל-60 שניות לכל היותר. זה יתועד.
 - **Scale-out:** עם `IMemoryCache` כל מופע שרת מחזיק Cache משלו, ו-Invalidation במופע אחד לא מגיע לאחרים. הפתרון: `IDistributedCache` (Redis) עם אותו Key ואותה Invalidation, או הודעות Invalidation ב-Redis Pub/Sub (או `HybridCache` עם Tags ב-.NET 9+). זה יתועד ולא ימומש.
 
-### 3.5 אסטרטגיית בדיקות
+### 3.5 Testing Strategy — אסטרטגיית בדיקות
 - **Unit:** לוגיקה טהורה, כלומר `StatusTransitionPolicy` ו-Validation של פרמטרי שאילתה. מהיר, בלי DB.
 - **Integration:** `WebApplicationFactory` מול **SQL Server אמיתי** (DB נפרד `RequestsManagement_Tests`). Concurrency מבוסס `rowversion` ותרגום LINQ ל-SQL הם מה שצריך לבדוק, ו-EF InMemory או SQLite לא מדמים אותם נאמנה. הנתונים מאופסים לפני כל בדיקה, עם Seed קטן ודטרמיניסטי.
 - **בלי Testcontainers**, כי הוא דורש Docker. החיסרון: מי שמריץ את הבדיקות צריך SQL Server מקומי (Connection String ניתן להגדרה). זה יתועד.
 - **Angular:** בלי בדיקות אוטומטיות (לא נדרש). זה יופיע כמגבלה ידועה.
 
-### 3.6 ביצועים ואינדקסים
+### 3.6 Performance & Indexes — ביצועים ואינדקסים
 - `Status` ו-`Priority` נשמרים כ-`tinyint`, כדי שהאינדקסים יהיו צרים. ב-JSON הם מוצגים כמחרוזות.
 - `Id` הוא `int IDENTITY` ו-Clustered (צר ורציף).
 - **אינדקסים ראשוניים** (יאומתו במדידה ב-T-801, ויכול להיות שחלק יוסר):
