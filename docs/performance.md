@@ -95,7 +95,7 @@ All indexes were enabled throughout. The migration `AddIndexes` created these no
 | `IX_Requests_CreatedAt` | CreatedAt DESC | Date-range-only queries |
 | `IX_Requests_OrganizationName` | OrganizationName ASC | OrganizationName prefix filter |
 
-All key columns include `CreatedAt DESC` as the trailing key so that `ORDER BY CreatedAt DESC` queries avoid a sort operator when the leading filter is an equality predicate.
+The three composite indexes for `Status`, `Priority`, and `AssignedTo` each include `CreatedAt DESC` as the trailing key so that `ORDER BY CreatedAt DESC` queries avoid a sort operator when the leading filter is an equality predicate. `IX_Requests_OrganizationName` contains only `OrganizationName ASC` and does not include a trailing `CreatedAt` key.
 
 ---
 

@@ -14,7 +14,7 @@
 **מקרא**
 - **עדיפות:** `P1` = חובה, ליבת הניקוד, לא נחתכת · `P2` = חובה/מחזק ציון, ניתן לצמצם היקף · `P3` = רשות (Stretch), רק אם נשאר זמן.
 - **סטטוס:** `To Do` / `In Progress` / `Done`.
-- **הערכות זמן** הן יעדים בעבודה עם AI, כולל זמן לקריאה ובדיקה ידנית של כל קוד שנוצר. הזמן בפועל נרשם בסוף כל יום.
+- **הערכות זמן** הן יעדים בעבודה עם AI, כולל זמן לקריאה ובדיקה ידנית של כל קוד שנוצר. לפי התכנון המקורי, הזמן בפועל אמור היה להירשם בסוף כל יום.
 - **כלל Seeder:** קוד ה-Seeder יסמן בבירור את ה-DB שהוא מוחק. לא מוחקים נתונים ללא אישור מפורש.
 - **כלל Bulk:** ישויות שנכשלו ב-Concurrency יוסרו מ-ChangeTracker לפני ה-`SaveChanges` הבא, כדי למנוע retry בשוגג.
 - **כלל Angular:** מתחילים Front-End ברגע ש-GET /api/requests עובד (לא מחכים לסוף).
@@ -22,11 +22,11 @@
 
 ---
 
-## 1. ניתוח דרישות ו-Traceability
+## 1. Requirements & Traceability — ניתוח דרישות
 
 כל דרישה מה-PDF קיבלה מזהה `R-x.y` ומקושרת למשימה אחת או יותר.
 
-### 1.0 מודל נתונים ונתוני בדיקה (סעיף "המשימה" + "מבנה פנייה")
+### 1.0 Data Model & Seed Data — מודל נתונים ונתוני בדיקה (סעיף "המשימה" + "מבנה פנייה")
 
 | ID | דרישה | משימות | עדיפות |
 |---|---|---|---|
@@ -36,7 +36,7 @@
 | R-0.4 | בחירת DB (SQL Server / MongoDB / אחר) ונימוק | T-902, §3 | P1 |
 | R-0.5 | מספר משתמשים עובדים במקביל, כמות נתונים גדולה (הקשר לביצועים ולתחרותיות) | T-302, T-401, T-801 | P1 |
 
-### 1.1 שליפת נתונים — חובה
+### 1.1 Data Retrieval — שליפת נתונים (חובה)
 
 | ID | דרישה | משימות | עדיפות |
 |---|---|---|---|
@@ -51,7 +51,7 @@
 | R-1.9 | החזרת DTOs ולא ישויות DB | T-201, T-202 | P1 |
 | R-1.10 | תיעוד: איך נמנעת טעינת כל הנתונים לזיכרון ואיך האינדקסים תומכים בחיפוש ובסינון | T-801, T-902 | P1 |
 
-### 1.2 עדכון סטטוס ותחרותיות — חובה
+### 1.2 Status Update & Concurrency — עדכון סטטוס ותחרותיות (חובה)
 
 | ID | דרישה | משימות | עדיפות |
 |---|---|---|---|
@@ -61,14 +61,14 @@
 | R-2.4 | UpdatedAt ו-RowVersion מתעדכנים באופן עקבי | T-302 | P1 |
 | R-2.5 | מניעת Lost Update | T-302, T-401 | P1 |
 
-### 1.3 היסטוריית שינויים — חובה
+### 1.3 Status History — היסטוריית שינויים (חובה)
 
 | ID | דרישה | משימות | עדיפות |
 |---|---|---|---|
 | R-3.1 | Audit לכל שינוי Status: RequestId, PreviousStatus, NewStatus, ChangedAt, ChangedBy | T-102, T-302, T-401 | P1 |
 | R-3.2 | Endpoint לצפייה בהיסטוריית השינויים של פנייה | T-303 | P1 |
 
-### 1.4 פעולת Bulk — חובה
+### 1.4 Bulk Update — פעולת Bulk (חובה)
 
 | ID | דרישה | משימות | עדיפות |
 |---|---|---|---|
@@ -89,7 +89,7 @@
 | R-5.7 | צפייה בהיסטוריית שינויים | T-705 | P1 |
 | R-5.8 | הפרדת אחריות בין Components ל-Services | T-701–T-705 | P1 |
 
-### 1.6 ביצועים — חובה
+### 1.6 Performance — ביצועים (חובה)
 
 | ID | דרישה | משימות | עדיפות |
 |---|---|---|---|
@@ -109,7 +109,7 @@
 | R-7.4 | נימוק לבחירת המידע שנשמר ב-Cache | T-902 | P1 |
 | R-7.5 | תיאור ההתאמה הנדרשת כשיש כמה מופעי שרת | T-902 | P1 |
 
-### 1.8 בדיקות אוטומטיות — חובה
+### 1.8 Automated Tests — בדיקות אוטומטיות (חובה)
 
 | ID | דרישה | משימות | עדיפות |
 |---|---|---|---|
@@ -119,7 +119,7 @@
 | R-8.4 | Concurrency Conflict | T-604 | P1 |
 | R-8.5 | Integration Test שכולל API ו-DB (או תחליף מתאים) | T-601, T-603, T-604 | P1 |
 
-### 1.9 תכנון עבודה וחלוקה למשימות — חובה
+### 1.9 Work Planning — תכנון עבודה וחלוקה למשימות (חובה)
 
 | ID | דרישה | משימות | עדיפות |
 |---|---|---|---|
@@ -130,7 +130,7 @@
 | R-9.5 | קשר ברור בין דרישות למשימות | §1 (הטבלה הזו) | P1 |
 | R-9.6 | גם משימות שאינן קוד: תכנון DB, בדיקות, ביצועים, תיעוד, היערכות להרצה | T-103, T-6xx, T-801, T-9xx | P1 |
 
-### 1.10 איכות הקוד
+### 1.10 Code Quality — איכות הקוד
 
 | ID | דרישה | משימות | עדיפות |
 |---|---|---|---|
@@ -144,7 +144,7 @@
 | R-10.8 | Logging בנקודות משמעותיות, בלי חשיפת מידע רגיש | T-304, T-302, T-401 | P1 |
 | R-10.9 | הימנעות מ-Over-Engineering | §2, §3 | P1 |
 
-### 1.11 תיעוד הפתרון — חובה
+### 1.11 Solution Documentation — תיעוד הפתרון (חובה)
 
 | ID | דרישה | משימות | עדיפות |
 |---|---|---|---|
@@ -158,7 +158,7 @@
 | R-11.8 | מגבלה ידועה אחת ודבר אחד שאפשר היה לשפר | T-902 | P1 |
 | R-11.9 | פירוט השימוש בכלי AI: באילו חלקים, ומה נבדק או שונה ידנית | T-902 (רישום שוטף לאורך כל הימים) | P1 |
 
-### 1.12 אופן הגשה
+### 1.12 Submission — אופן הגשה
 
 | ID | דרישה | משימות | עדיפות |
 |---|---|---|---|
@@ -166,7 +166,7 @@
 | R-12.2 | ההגשה כוללת את כל הרכיבים ומאפשרת הרצה | T-901, T-903 | P1 |
 | R-12.3 | בלי ZIP ובלי קוד מצורף לדוא"ל → Repository ב-GitHub עם גישה לבודקים | T-101, T-903 | P1 |
 
-### 1.13 הנחות לגבי פערים באפיון (יתועדו ב-README)
+### 1.13 Specification Assumptions — הנחות לגבי פערים באפיון (יתועדו ב-README)
 
 | נושא | ה-PDF לא מגדיר | ההנחה שלנו |
 |---|---|---|
@@ -179,34 +179,34 @@
 
 ---
 
-## 2. ארכיטקטורה
+## 2. Architecture — ארכיטקטורה
 
 ```
 RequestsManagement/                (GitHub repo)
-├─ README.md                       הוראות הרצה, גרסאות, מבנה
-├─ TASKS.md                        המסמך הזה
+├─ README.md                       Setup, versions, project structure
+├─ TASKS.md                        This document
 ├─ docs/
-│  ├─ decisions.md                 החלטות טכנולוגיות, Concurrency, Bulk, Cache, AI usage
-│  └─ performance.md               מדידות, Plans, אינדקסים, Bottlenecks
+│  ├─ decisions.md                 Technical decisions: DB, Concurrency, Bulk, Cache, AI usage
+│  └─ performance.md               Measurements, execution plans, indexes, bottlenecks
 ├─ backend/
 │  ├─ RequestsManagement.sln
 │  ├─ src/RequestsManagement.Api/
-│  │  ├─ Controllers/              RequestsController (HTTP בלבד: Binding, Mapping תוצאה → קוד HTTP)
+│  │  ├─ Controllers/              RequestsController (HTTP only: binding, result → HTTP code mapping)
 │  │  ├─ Services/                 RequestQueryService, RequestStatusService, RequestSummaryService
 │  │  ├─ Domain/                   Request, RequestStatusHistory, enums, StatusTransitionPolicy
 │  │  ├─ Data/                     AppDbContext, Configurations/, Migrations/, Seeding/DataSeeder
-│  │  ├─ Dtos/                     Request/Response DTOs + Mapping (Projection ב-LINQ, בלי AutoMapper)
+│  │  ├─ Dtos/                     Request/Response DTOs + Mapping (LINQ Projection, no AutoMapper)
 │  │  ├─ Infrastructure/           GlobalExceptionHandler (IExceptionHandler + ProblemDetails)
-│  │  └─ Program.cs                DI, Middleware, הפעלת Seeder דרך CLI arg
+│  │  └─ Program.cs                DI, Middleware, seed mode (CLI arg)
 │  └─ tests/RequestsManagement.Tests/
-│     ├─ Unit/                     StatusTransitionPolicy, Validation של פרמטרים
-│     └─ Integration/              WebApplicationFactory + SQL Server DB ייעודי לבדיקות
+│     ├─ Unit/                     StatusTransitionPolicy, parameter validation
+│     └─ Integration/              WebApplicationFactory + dedicated SQL Server test DB
 └─ frontend/requests-app/          Angular 20, Standalone Components
    └─ src/app/
-      ├─ core/                     models (DTO interfaces), RequestsApiService (HttpClient בלבד)
+      ├─ core/                     DTO interfaces, RequestsApiService (HttpClient only)
       └─ features/requests/
-         ├─ requests-page.component  Container: פילטרים, RxJS pipeline, טבלה, היסטוריה (Single Component)
-         └─ summary-panel/           Aggregations
+         ├─ requests-page.component  Container: filters, RxJS pipeline, table, history (single component)
+         └─ summary-panel/           Aggregations display
 ```
 
 **הפרדת אחריות**
@@ -233,7 +233,7 @@ RequestsManagement/                (GitHub repo)
 
 ---
 
-## 3. החלטות טכנולוגיות (סיכום — פירוט מלא ב-`docs/decisions.md`)
+## 3. Design Decisions — החלטות טכנולוגיות (פירוט מלא ב-`docs/decisions.md`)
 
 ### 3.1 SQL Server לעומת MongoDB
 - **נבחר: SQL Server.** הנתונים מובנים וסכמתם קבועה. יש תמיכה מובנית ב-`rowversion` ל-Optimistic Concurrency. עדכון הפנייה ושורת ה-Audit נכנסים לאותה טרנזקציה. `GROUP BY` ואינדקסים מורכבים זמינים בקלות. EF Core 8 בשל, וה-SQL Server כבר מותקן בסביבה.
@@ -284,7 +284,7 @@ RequestsManagement/                (GitHub repo)
 
 ---
 
-## 4. טבלת משימות (סיכום)
+## 4. Task Summary — טבלת משימות
 
 | ID | משימה | Epic | הערכה (ש') | עדיפות | תלויות | יום | סטטוס |
 |---|---|---|---|---|---|---|---|
@@ -337,7 +337,7 @@ RequestsManagement/                (GitHub repo)
 
 ---
 
-## 5. פירוט משימות
+## 5. Task Details — פירוט משימות
 
 ### T-000 — תכנון ו-TASKS.md · 0.5ש' · P1 · Done
 - **תיאור:** קריאת ה-PDF, ניתוח דרישות, ארכיטקטורה, החלטות, פירוק למשימות ולוח זמנים.
@@ -347,7 +347,7 @@ RequestsManagement/                (GitHub repo)
 ### E1 — Setup & Data
 
 #### T-101 — Solution skeleton · 0.5ש' · P1
-- **תיאור:** `git init`, `.gitignore` (dotnet + node), `backend/RequestsManagement.sln`, פרויקט `RequestsManagement.Api` (net8.0) ופרויקט `RequestsManagement.Tests` (xUnit). חבילות: `Microsoft.EntityFrameworkCore.SqlServer`, `.Design`, `Microsoft.AspNetCore.Mvc.Testing`. Swagger, `JsonStringEnumConverter`, Connection String ב-`appsettings.Development.json`. **בדיקת `node -v`** (Angular 20 דורש Node ‎20.19 ומעלה).
+- **תיאור:** `git init`, `.gitignore` (dotnet + node), `backend/RequestsManagement.sln`, פרויקט `RequestsManagement.Api` (net8.0) ופרויקט `RequestsManagement.Tests` (xUnit). חבילות: `Microsoft.EntityFrameworkCore.SqlServer`, `.Design`, `Microsoft.AspNetCore.Mvc.Testing`. Swagger, `JsonStringEnumConverter`, Connection String ב-`appsettings.Development.json`. **בדיקת `node -v`** (Angular 20 דורש Node `20.19` ומעלה).
 - **תוצר:** Solution שמתקמפל, ו-`/swagger` עולה.
 - **AC:** `dotnet build` ו-`dotnet test` עוברים (גם בלי בדיקות); יש Commit ראשון; גרסת Node תואמת או שהבעיה תועדה.
 
@@ -540,7 +540,7 @@ RequestsManagement/                (GitHub repo)
 
 ---
 
-## 6. תוכנית עבודה ל-6 ימים (מעודכן 22.10)
+## 6. Work Schedule — תוכנית עבודה ל-6 ימים (מעודכן 22.10)
 
 > _תוכנית מקורית שנוסחה ב-22.10 לפני תחילת המימוש. הסטטוס הסופי של כל משימה נמצא ב-§4; יומן העבודה בפועל ב-§6.1._
 
@@ -624,7 +624,7 @@ most generated code and verified application behavior before each commit.
 
 ---
 
-## 7. סיכונים, דרישות בסיכון וקיצוצים
+## 7. Risks & Cutbacks — סיכונים, דרישות בסיכון וקיצוצים
 
 > _סעיף זה הוא תוצר תכנון מקורי (22.10). חלק מהסיכונים התממשו ונפתרו; פירוט בפועל ב-§6.1._
 
@@ -659,7 +659,7 @@ most generated code and verified application behavior before each commit.
 
 ---
 
-## 8. מיפוי לניקוד (לתעדוף)
+## 8. Score Mapping — מיפוי לניקוד (לתעדוף)
 
 | תחום (משקל) | Epics עיקריים | שעות מתוכננות |
 |---|---|---|
