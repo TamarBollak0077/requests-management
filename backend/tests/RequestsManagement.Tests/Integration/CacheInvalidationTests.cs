@@ -36,10 +36,6 @@ public sealed class CacheInvalidationTests : IAsyncLifetime
     public async Task InitializeAsync() => await _factory.ResetAsync();
     public Task DisposeAsync() => Task.CompletedTask;
 
-    // ── TC-1: Summary reflects status change immediately after PATCH ──────────
-    // Flow: GET summary (populate cache) → PATCH status → GET summary again
-    // Expectation: the second summary shows updated counts without TTL wait.
-
     [Fact]
     public async Task GetSummary_AfterSuccessfulStatusUpdate_ReflectsNewStatusImmediately()
     {
@@ -106,9 +102,6 @@ public sealed class CacheInvalidationTests : IAsyncLifetime
         Assert.Equal(totalBefore, totalAfter);
     }
 
-    // ── TC-2: Rejected update does not change summary counts ─────────────────
-    // A 400 (invalid transition) must leave the cache and persisted data intact.
-
     [Fact]
     public async Task GetSummary_AfterRejectedStatusUpdate_CountsUnchanged()
     {
@@ -166,15 +159,11 @@ public sealed class CacheInvalidationTests : IAsyncLifetime
         Assert.Equal(completedBefore, completedAfter);
     }
 
-    // ── Helpers ───────────────────────────────────────────────────────────────
-
     private static int CountForStatus(SummaryDto dto, string statusName) =>
         dto.ByStatus.FirstOrDefault(s => s.Status == statusName)?.Count ?? 0;
 
     private static int TotalCount(SummaryDto dto) =>
         dto.ByStatus.Sum(s => s.Count);
-
-    // ── Local response-shape records ─────────────────────────────────────────
 
     private sealed record SummaryDto(
         List<StatusCountItem> ByStatus,

@@ -18,14 +18,8 @@ public sealed class RequestQueryService(
         RequestQueryParameters p,
         CancellationToken ct = default)
     {
-        // ── Step 1: base query (IQueryable — nothing hits the DB yet) ─────────
         // AsNoTracking: read-only path; skip EF identity-map overhead.
         var query = db.Requests.AsNoTracking();
-
-        // ── Step 2: apply filters (AND-combined predicates) ───────────────────
-        // Each guard is a null/empty check so the WHERE clause is emitted only
-        // when the filter is actually requested.  All comparisons are on indexed
-        // columns wherever possible (see RequestConfiguration indexes).
 
         if (p.Status.HasValue)
             query = query.Where(r => r.Status == p.Status.Value);
@@ -73,8 +67,6 @@ public sealed class RequestQueryService(
                 r.OrganizationName.Contains(term));
         }
 
-        // ── Step 3: COUNT (with all filters applied) ─────────────────────────
-        // EF strips ORDER BY when translating CountAsync.
         var totalCount = await query.CountAsync(ct);
 
         var ordered = ApplySort(query, p.SortBy, p.SortDirection);
@@ -167,8 +159,6 @@ public sealed class RequestQueryService(
                 h.ChangedBy))
             .ToListAsync(ct);
     }
-
-    // ── Helpers ───────────────────────────────────────────────────────────────
 
     /// <summary>
     /// Applies ORDER BY from a validated (sortBy, sortDirection) pair.

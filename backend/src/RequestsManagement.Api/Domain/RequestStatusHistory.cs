@@ -19,6 +19,5 @@ public class RequestStatusHistory
     /// </summary>
     public string ChangedBy { get; set; } = string.Empty;
 
-    // Navigation
     public Request Request { get; set; } = null!;
 }

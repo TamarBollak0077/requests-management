@@ -31,7 +31,6 @@ public sealed class RequestStatusService(
                 "RowVersion is not a valid Base64 string.");
         }
 
-        // ── 2. Load entity (tracked — required for the EF UPDATE) ────────────
         var request = await db.Requests.FindAsync(new object[] { id }, ct);
         if (request is null)
             return new StatusUpdateResult.NotFound();
@@ -41,8 +40,6 @@ public sealed class RequestStatusService(
             return new StatusUpdateResult.InvalidTransition(
                 $"Transition from '{request.Status}' to '{newStatus}' is not allowed.");
 
-        // ── 4. Inject the client's RowVersion as the concurrency token ────────
-        //
         // FindAsync populates the EF entry with the DB's *current* RowVersion.
         // If we left it as-is, EF would compare the DB value against itself —
         // always equal, never a conflict.  By overwriting OriginalValue with the
@@ -56,7 +53,6 @@ public sealed class RequestStatusService(
         request.Status = newStatus;
         request.UpdatedAt = timeProvider.GetUtcNow().UtcDateTime;
 
-        // Added to the same DbContext so it goes in the same transaction below.
         db.RequestStatusHistory.Add(new RequestStatusHistory
         {
             RequestId = id,
@@ -66,7 +62,6 @@ public sealed class RequestStatusService(
             ChangedBy = dto.ChangedBy,
         });
 
-        // ── 7. One SaveChanges = one transaction ──────────────────────────────
         // EF wraps multiple entity changes in an implicit transaction.
         // If the UPDATE fails (DbUpdateConcurrencyException), SQL Server rolls
         // back the whole transaction — the history row is never inserted.
@@ -116,7 +111,6 @@ public sealed class RequestStatusService(
         var newStatus = dto.NewStatus!.Value;
         var now = timeProvider.GetUtcNow().UtcDateTime;
 
-        // ── 1. Load all requested entities in a single round-trip ────────────
         // Tracked (no AsNoTracking) — we need EF to generate UPDATE statements.
         var ids = dto.Items.Select(i => i.Id).ToList();
         var requestsById = await db.Requests
@@ -159,7 +153,6 @@ public sealed class RequestStatusService(
             request.Status = newStatus;
             request.UpdatedAt = now;
 
-            // ── Queue audit record in the same DbContext ──────────────────────
             var historyEntry = new RequestStatusHistory
             {
                 RequestId = item.Id,
@@ -170,7 +163,6 @@ public sealed class RequestStatusService(
             };
             db.RequestStatusHistory.Add(historyEntry);
 
-            // ── Save (one implicit transaction: UPDATE + INSERT) ──────────────
             try
             {
                 await db.SaveChangesAsync(ct);
@@ -185,7 +177,6 @@ public sealed class RequestStatusService(
             }
             catch (DbUpdateConcurrencyException ex)
             {
-                // ── Bulk rule: detach BEFORE the next SaveChanges ─────────────
                 // After a concurrency failure the Request entry remains Modified
                 // and the history entry remains Added in the ChangeTracker.
                 // If we leave them there, the next iteration's SaveChanges will

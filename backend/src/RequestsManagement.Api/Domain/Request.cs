@@ -12,9 +12,6 @@ public class Request
 
     public RequestPriority Priority { get; set; }
 
-    /// <summary>
-    /// Identifier or name of the person handling this request.
-    /// </summary>
     public string? AssignedTo { get; set; }
 
     public DateTime CreatedAt { get; set; }
@@ -28,6 +25,5 @@ public class Request
     /// </summary>
     public byte[] RowVersion { get; set; } = [];
 
-    // Navigation
     public ICollection<RequestStatusHistory> StatusHistory { get; set; } = [];
 }

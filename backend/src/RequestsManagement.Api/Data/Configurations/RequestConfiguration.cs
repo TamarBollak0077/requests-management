@@ -49,13 +49,11 @@ public class RequestConfiguration : IEntityTypeConfiguration<Request>
             .IsRowVersion()
             .IsRequired();
 
-        // Relationships
         builder.HasMany(r => r.StatusHistory)
             .WithOne(h => h.Request)
             .HasForeignKey(h => h.RequestId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        // ── Indexes ──────────────────────────────────────────────────────────
         // All composite indexes include CreatedAt DESC as the trailing key so
         // that the common "most recent first" sort is covered without a sort
         // operator in the execution plan.  Id is added as a non-key INCLUDE

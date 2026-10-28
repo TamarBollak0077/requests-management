@@ -85,7 +85,6 @@ export class RequestsPageComponent {
    */
   readonly summaryRefresh$ = new Subject<void>();
 
-  // ── Filter form state ────────────────────────────────────────────────
   filters: FilterState = { ...DEFAULT_FILTERS };
 
   readonly statuses: RequestStatus[] = ['New', 'InProgress', 'Waiting', 'Completed'];
@@ -96,7 +95,6 @@ export class RequestsPageComponent {
     { value: 'title', label: 'Title' },
   ];
 
-  // ── Row-level optimistic update state ───────────────────────────────
   // Keyed by request id.  Plain objects (not Map) for Angular CD compatibility.
 
   /** Successful-update overrides for status/rowVersion pending the next page reload. */
@@ -105,13 +103,10 @@ export class RequestsPageComponent {
   /** Per-row UI state: spinner and error message. */
   rowState: Record<number, RowUiState> = {};
 
-  // ── Row-level history state ──────────────────────────────────────────
   /** Whether the history panel is expanded for a given row id. */
   historyOpen: Record<number, boolean> = {};
   /** Cached history fetch state per row id. */
   historyState: Record<number, HistoryState> = {};
-
-  // ── RxJS pipeline ────────────────────────────────────────────────────
 
   private readonly params$ = new BehaviorSubject<RequestQueryParams>(
     this.buildParams(1)
@@ -154,8 +149,6 @@ export class RequestsPageComponent {
     });
   }
 
-  // ── Filter event handlers ────────────────────────────────────────────
-
   onTextChange(): void { this.textChange$.next(); }
   onImmediateChange(): void { this.params$.next(this.buildParams(1)); }
 
@@ -172,8 +165,6 @@ export class RequestsPageComponent {
   retry(): void { this.params$.next({ ...this.params$.value }); }
 
   goToPage(page: number): void { this.params$.next(this.buildParams(page)); }
-
-  // ── Status update ────────────────────────────────────────────────────
 
   /** Effective status for a row: patched value if available, else the server value. */
   getEffectiveStatus(req: RequestListItem): RequestStatus {
@@ -250,8 +241,6 @@ export class RequestsPageComponent {
       });
   }
 
-  // ── History ──────────────────────────────────────────────────────────
-
   /**
    * Toggle the history panel for a row.
    * On first open: fetches from the API. On subsequent opens: uses cached data.
@@ -291,8 +280,6 @@ export class RequestsPageComponent {
     const s = this.historyState[id];
     return s?.kind === 'loaded' ? s.items : [];
   }
-
-  // ── Helpers ──────────────────────────────────────────────────────────
 
   get currentPage(): number { return this.params$.value.page; }
 

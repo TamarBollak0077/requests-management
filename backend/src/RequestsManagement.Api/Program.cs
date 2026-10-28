@@ -7,8 +7,6 @@ using RequestsManagement.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ── Services ────────────────────────────────────────────────────────────────
-
 builder.Services.AddControllers()
     .AddJsonOptions(opts =>
     {
@@ -51,8 +49,6 @@ builder.Services.AddDbContext<AppDbContext>(opts =>
         sql => sql.EnableRetryOnFailure()
                   .CommandTimeout(300)));
 
-// ── Pipeline ─────────────────────────────────────────────────────────────────
-
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -67,7 +63,6 @@ app.UseExceptionHandler();
 app.UseHttpsRedirection();
 app.MapControllers();
 
-// ── Seed mode ────────────────────────────────────────────────────────────────
 // Run as:  dotnet run --project src/RequestsManagement.Api -- --seed [count]
 // Exits after seeding; does NOT start the web server.
 if (args.Contains("--seed"))

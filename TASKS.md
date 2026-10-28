@@ -8,6 +8,9 @@
 | Stack | ASP.NET Core 8 Web API · EF Core 8 · SQL Server · Angular 20 · xUnit |
 | סטטוס התכנון | Updated 22.10: Backend complete + Angular list/filter done + 3 bugs fixed; revised schedule in section 6 |
 
+**סטטוס פרויקט — 28.10.2026 (הגשה)**
+כל 28 משימות P1 + 3 משימות P2 הושלמו (31 סה"כ). T-606 (P3, Cache test) גם בוצע. T-706 (Bulk UI) לא מומש — P3 אופציונלי, לא נדרש ב-PDF. 45 בדיקות עוברות. הפרויקט מוכן להגשה.
+
 **מקרא**
 - **עדיפות:** `P1` = חובה, ליבת הניקוד, לא נחתכת · `P2` = חובה/מחזק ציון, ניתן לצמצם היקף · `P3` = רשות (Stretch), רק אם נשאר זמן.
 - **סטטוס:** `To Do` / `In Progress` / `Done`.
@@ -202,11 +205,8 @@ RequestsManagement/                (GitHub repo)
    └─ src/app/
       ├─ core/                     models (DTO interfaces), RequestsApiService (HttpClient בלבד)
       └─ features/requests/
-         ├─ requests-page/         Container: RxJS pipeline (state, debounce, switchMap)
-         ├─ requests-filters/      Presentational: טופס סינון/חיפוש → Output
-         ├─ requests-table/        Presentational: טבלה, מיון, דפדוף, בחירת סטטוס
-         ├─ summary-panel/         Aggregations
-         └─ request-history/       היסטוריית שינויים
+         ├─ requests-page.component  Container: פילטרים, RxJS pipeline, טבלה, היסטוריה (Single Component)
+         └─ summary-panel/           Aggregations
 ```
 
 **הפרדת אחריות**
@@ -214,7 +214,7 @@ RequestsManagement/                (GitHub repo)
 - **Service**: לוגיקה עסקית, מעברי סטטוס, Concurrency, Audit ו-Cache. מחזיר אובייקט תוצאה (`Success` / `NotFound` / `InvalidTransition` / `Conflict`) ולא זורק Exceptions כדי לנהל זרימה רגילה.
 - **Data**: `AppDbContext` ו-Fluent Configurations. בלי Repository Pattern מעל EF Core, כי `DbContext` כבר משמש Unit of Work ו-Repository.
 - **DTOs**: חוזה ה-API. ישויות לא חוזרות החוצה. שליפות משתמשות ב-Projection (`Select` ל-DTO), כך שרק העמודות הנחוצות נקראות.
-- **Angular**: Service אחראי רק על HTTP. ה-Page Component מחזיק את ה-State ואת ה-Pipeline. רכיבי התצוגה מקבלים Inputs ומחזירים Outputs.
+- **Angular**: Service אחראי רק על HTTP. ה-Page Component מחזיק את ה-State ואת ה-Pipeline (פילטרים, מיון, דפדוף, עדכון סטטוס, היסטוריה — הכול ב-Component אחד). Summary Panel הוא Component נפרד עם `refreshTrigger$` Input.
 
 **DI Lifetimes**: `AppDbContext` ו-Services ב-Scoped. `IMemoryCache` ו-`TimeProvider` ב-Singleton. Service שמחזיק DbContext לא נרשם כ-Singleton.
 
@@ -338,7 +338,7 @@ RequestsManagement/                (GitHub repo)
 
 ## 5. פירוט משימות
 
-### T-000 — תכנון ו-TASKS.md · 0.5ש' · P1 · In Progress
+### T-000 — תכנון ו-TASKS.md · 0.5ש' · P1 · Done
 - **תיאור:** קריאת ה-PDF, ניתוח דרישות, ארכיטקטורה, החלטות, פירוק למשימות ולוח זמנים.
 - **תוצר:** `TASKS.md` (המסמך הזה).
 - **AC:** לכל דרישה ב-PDF יש מזהה ומשימה; לכל משימה יש תיאור, תוצר, AC, תלויות, הערכה, עדיפות וסטטוס; האישור שלך התקבל.
@@ -443,7 +443,7 @@ RequestsManagement/                (GitHub repo)
 
 #### T-605 — Integration: 404, 400 ו-Bulk · 0.25ש' · P2 · Done
 - **AC:** PATCH ל-Id לא קיים מחזיר 404; מעבר אסור מחזיר 400; Bulk מעורב מחזיר Outcomes נכונים.
-- **מימוש:** `StatusUpdateEdgeCaseTests.cs` — 3 בדיקות אינטגרציה. כל 43 הבדיקות עוברות.
+- **מימוש:** `StatusUpdateEdgeCaseTests.cs` — 3 בדיקות אינטגרציה. כל 43 הבדיקות עוברות בשלב זה (לפני T-606; הספירה הסופית היא 45 — ראה T-606).
 
 #### T-606 — Cache invalidation test · 0.25ש' · P3 · Done
 - **AC:** GET summary, אחר כך PATCH, ואחר כך GET summary מחזיר ספירות מעודכנות.
@@ -505,20 +505,17 @@ RequestsManagement/                (GitHub repo)
 ### E8 — Performance
 
 #### T-802 — Covering index evaluation and adoption decision · 0.5ש' · P2
-- **Context:** T-801 experiment (docs/performance.md §8) showed that adding INCLUDE columns to `IX_Requests_Status_CreatedAt` reduces page-1 logical reads from 1,510 to 5 (−99.7%) and page-500 reads from 1,510 to 133 (−91.2%). The experimental index was dropped after measurement. Performance.md §9 recommends permanent adoption, subject to verification of the COUNT query.
-- **Description:** Evaluate and decide whether to permanently adopt the covering index. If evidence supports it, create the migration; if not, document why and leave the key-only index in place.
-- **Steps:**
-  1. Compare current strategy (key-only `IX_Requests_Status_CreatedAt`) with the proposed covering variant `(Status ASC, CreatedAt DESC, Id DESC) INCLUDE (Title, OrganizationName, Priority, AssignedTo, UpdatedAt, RowVersion)` — see performance.md §8 for the DDL.
-  2. Re-run A-COUNT (`SELECT COUNT(*) WHERE Status=1 AND CreatedAt range`) with only the covering index available (disable the key-only index temporarily or simulate with a query hint) to confirm that the COUNT path does not degrade beyond an acceptable threshold. The key concern: covering index leaf rows are ~37× larger (~484 bytes vs. ~13 bytes); COUNT may need more I/O.
-  3. Check C1 (`GROUP BY Status`) and C2 (`GROUP BY Priority`) with the covering index — the optimizer chose the key-only index for those in the experiment (§8 table shows 0 change); confirm it still prefers the narrower existing indexes for GROUP BY after replacement.
-  4. Confirm write overhead is acceptable: the INCLUDE columns include the widest string fields (`Title` 200, `OrganizationName` 150, `AssignedTo` 100); benchmark a representative INSERT and UPDATE against the current schema.
-  5. Decision: if COUNT and GROUP BY paths are unaffected and write overhead is acceptable → create an EF Core migration using `DROP_EXISTING = ON` to replace `IX_Requests_Status_CreatedAt` in place. Otherwise → document the trade-off and leave the schema as-is.
-  6. Update docs/performance.md with the decision, final index inventory, and any new measurements.
+- **Context:** T-801 experiment (docs/performance.md §8) showed that adding INCLUDE columns to `IX_Requests_Status_CreatedAt` reduces page-1 logical reads from 1,510 to 5 (−99.7%) and page-500 reads from 1,510 to 133 (−91.2%). The experimental index was dropped after measurement. Performance.md §9 recommended permanent adoption, subject to verification of the COUNT query.
+- **Description:** Evaluate and decide whether to permanently adopt the covering index alongside or instead of the key-only index.
+- **Decision (27.10) — Both indexes retained:**
+  - COUNT and GROUP BY queries continue to prefer the narrow key-only `IX_Requests_Status_CreatedAt` (unchanged at 79 reads).
+  - Paginated list queries use the new `IX_Requests_Status_CreatedAt_Covering` (eliminates Key Lookups).
+  - The covering index was added as a **separate** index (migration `AddCoveringIndex`), not as a replacement (`DROP_EXISTING = ON` was not used). Both are present in the production schema.
+  - Write overhead is acceptable at this scale; INCLUDE columns are identical to the projected SELECT, so no extra maintenance overhead beyond what the query already reads.
 - **AC:**
-  - A-COUNT baseline (79 reads) is maintained or the degradation is documented with a decision rationale.
-  - Either a migration exists replacing the key-only index with the covering variant, or a documented decision explains why it was not adopted.
-  - docs/performance.md reflects the final production index state.
-- **Do not create or modify any database indexes before running the evaluation steps above.**
+  - A-COUNT baseline (79 reads) is maintained ✓
+  - Migration `AddCoveringIndex` creates `IX_Requests_Status_CreatedAt_Covering` alongside the existing key-only index ✓
+  - docs/performance.md reflects the final production index state (§13) ✓
 
 #### T-801 — מדידת ביצועים · 0.75ש' · P1
 - **תיאור:** שתי פעולות: (1) `GET /api/requests` עם Status, טווח תאריכים ומיון CreatedAt DESC, בדף ראשון ובדף עמוק; (2) `GET /api/requests/summary`. בנוסף, אם יש זמן, חיפוש טקסט כדי להדגים את ה-Bottleneck. שיטה: לכידת ה-SQL מה-Log של EF, הרצה ב-SSMS עם Actual Execution Plan ו-`SET STATISTICS IO, TIME ON`, לפני ואחרי האינדקסים (`ALTER INDEX ... DISABLE/REBUILD`).
@@ -543,6 +540,8 @@ RequestsManagement/                (GitHub repo)
 ---
 
 ## 6. תוכנית עבודה ל-6 ימים (מעודכן 22.10)
+
+> _תוכנית מקורית שנוסחה ב-22.10 לפני תחילת המימוש. הסטטוס הסופי של כל משימה נמצא ב-§4; יומן העבודה בפועל ב-§6.1._
 
 **כלל בסיסי: מקסימום 2 שעות ביום. יום ההגשה (28.10) — אימות והגשה בלבד.**
 **הערכות הזמן הן יעדים, לא התחייבות. בסוף כל יום: זמן בפועל + מה לא הושלם.**
@@ -625,6 +624,8 @@ most generated code and verified application behavior before each commit.
 ---
 
 ## 7. סיכונים, דרישות בסיכון וקיצוצים
+
+> _סעיף זה הוא תוצר תכנון מקורי (22.10). חלק מהסיכונים התממשו ונפתרו; פירוט בפועל ב-§6.1._
 
 ### 7.1 סיכונים
 

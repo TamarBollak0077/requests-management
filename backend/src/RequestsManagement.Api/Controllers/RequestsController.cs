@@ -10,14 +10,6 @@ public sealed class RequestsController(
     IRequestQueryService queryService,
     IRequestStatusService statusService) : ControllerBase
 {
-    // GET /api/requests?page=1&pageSize=20
-    //
-    // [ApiController] validates RequestQueryParameters automatically using DataAnnotations.
-    // If page < 1 or pageSize > 100, the framework returns HTTP 400 ValidationProblemDetails
-    // before this method body runs — no manual ModelState check needed.
-    //
-    // CancellationToken is bound from the HTTP request's abort signal.
-    // If the client disconnects, EF Core cancels the in-flight SQL query.
     [HttpGet]
     [ProducesResponseType(typeof(PagedResult<RequestListItemDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
@@ -39,10 +31,6 @@ public sealed class RequestsController(
         return Ok(result);
     }
 
-    // GET /api/requests/{id}/history
-    //
-    // 200 — array of history entries, newest first.  Empty array when no history yet.
-    // 404 — request not found.
     [HttpGet("{id:int}/history")]
     [ProducesResponseType(typeof(IReadOnlyList<RequestStatusHistoryItemDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

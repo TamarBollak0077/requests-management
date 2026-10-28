@@ -35,8 +35,6 @@ public sealed class StatusUpdateEdgeCaseTests : IAsyncLifetime
     public async Task InitializeAsync() => await _factory.ResetAsync();
     public Task DisposeAsync() => Task.CompletedTask;
 
-    // ── TC-1: PATCH non-existent ID returns 404 ───────────────────────────────
-
     [Fact]
     public async Task PatchStatus_NonExistentId_Returns404()
     {
@@ -49,8 +47,6 @@ public sealed class StatusUpdateEdgeCaseTests : IAsyncLifetime
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
-
-    // ── TC-2: PATCH invalid transition returns 400, DB is unchanged ───────────
 
     [Fact]
     public async Task PatchStatus_InvalidTransition_Returns400AndLeavesStatusUnchanged()
@@ -102,8 +98,6 @@ public sealed class StatusUpdateEdgeCaseTests : IAsyncLifetime
             .CountAsync(h => h.RequestId == requestId);
         Assert.Equal(0, historyCount);
     }
-
-    // ── TC-3: Bulk partial success — mixed batch ──────────────────────────────
 
     [Fact]
     public async Task BulkUpdateStatus_MixedBatch_ReturnsCorrectOutcomesAndPersistsOnlySuccesses()
@@ -220,8 +214,6 @@ public sealed class StatusUpdateEdgeCaseTests : IAsyncLifetime
         Assert.Single(auditB);
         Assert.Equal("setup", auditB[0].ChangedBy);
     }
-
-    // ── Local response-shape records ─────────────────────────────────────────
 
     private sealed record ProblemDetailsDto(string? Detail, string? Title);
 
